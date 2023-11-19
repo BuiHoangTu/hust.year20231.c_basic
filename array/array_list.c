@@ -2,7 +2,7 @@
 // Created by bhtuw on 19/11/2023.
 //
 
-#include "array_list.h"
+#include "array/array_list.h"
 #include <stdlib.h>
 #include <string.h>
 
