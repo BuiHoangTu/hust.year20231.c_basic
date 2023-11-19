@@ -1,0 +1,6 @@
+### JetBrains ###
+.idea/
+
+### Cmake
+cmake-build-debug
+
