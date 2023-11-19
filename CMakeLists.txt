@@ -27,6 +27,14 @@ add_library(minilib
         array/array_list.h
         core/heap.h
         core/type.h
+        list/double_linked_list.c
+        list/double_linked_list.h
+        list/queue.c
+        list/queue.h
+        list/single_linked_list.c
+        list/single_linked_list.h
+        list/stack.c
+        list/stack.h
 )
 
 
