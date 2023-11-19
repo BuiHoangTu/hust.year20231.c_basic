@@ -49,16 +49,7 @@ void *sll_remove(SingleLinkedList *list, int index);
  * @return 1: if the operation success
  *         0: if node is already the last node
 */
-int sll_next(SingleLinkedNode **node, void **obj)
-{
-	if ((*node) == NULL)
-		return 0;
-
-	*obj = (*node)->value;
-	(*node) = (*node)->next;
-
-	return 1;
-}
+int sll_next(SingleLinkedNode **node, void **obj);
 
 #define sll_foreach(obj, list)             \
 	SingleLinkedNode *_node = list->first; \

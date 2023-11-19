@@ -1,4 +1,5 @@
 #include "list/double_linked_list.h"
+#include "list/single_linked_list.c"
 
 #define toDLL(list) ((DoubleLinkedList *)list)
 #define toSLL(list) ((SingleLinkedList *)list)
@@ -100,7 +101,7 @@ void *dll_remove(DoubleLinkedList *list, int index)
     DoubleLinkedNode *current = toDLN(__sll_get_node(toSLL(list), index));
 
     if (current->base.next != NULL) {
-        toDLN(current->base.next)->prev = toSLN(current->prev);
+        toDLN(current->base.next)->prev = current->prev;
         
     }
 

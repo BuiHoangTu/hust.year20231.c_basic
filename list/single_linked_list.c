@@ -155,6 +155,17 @@ void *sll_remove(SingleLinkedList *list, int index)
 	return __sll_remove_node(list, current, prev);
 }
 
+int sll_next(SingleLinkedNode **node, void **obj)
+{
+    if ((*node) == NULL)
+        return 0;
+
+    *obj = (*node)->value;
+    (*node) = (*node)->next;
+
+    return 1;
+}
+
 void sll_free(SingleLinkedList *list)
 {
 	free(list);
