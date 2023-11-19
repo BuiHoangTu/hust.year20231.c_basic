@@ -35,6 +35,10 @@ add_library(minilib
         list/single_linked_list.h
         list/stack.c
         list/stack.h
+        tree/binary_tree.c
+        tree/binary_tree.h
+        tree/tree.c
+        tree/tree.h
 )
 
 
