@@ -45,6 +45,9 @@ add_library(minilib
         sort/selection_sort.h
 )
 
+### test ###
+add_subdirectory(tests)
+
 
 ### install ###
 if (${CMAKE_BUILD_TYPE} STREQUAL Release AND
