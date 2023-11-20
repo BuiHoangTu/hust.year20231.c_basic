@@ -34,11 +34,11 @@ Tree *treeMakeTree(TreeNode *root);
 TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func);
 
 /// <summary>
-/// Add a new node to the rightest side of the node
+/// Add a new node to the rightest side of the child node (left)
 /// </summary>
 /// <param name="node"></param>
 /// <param name="data"></param>
-void treeAddLast(TreeNode *node, void *data);
+void treeAddLastChild(TreeNode *node, void *data);
 
 void treePreOrder(Tree *t, Processor1 action);
 

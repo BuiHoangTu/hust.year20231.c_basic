@@ -42,16 +42,25 @@ TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func)
     return _rootFindNode(data, tree->root, func);
 }
 
-void treeAddLast(TreeNode *node, void *data)
+void treeAddLastChild(TreeNode *node, void *data)
 {
     if (!node)
         return;
 
-    TreeNode *mostRightNode = node;
+    // make new node
+    TreeNode *cur = treeMakeNode(data);
+    // find child
+    TreeNode *child = node->left;
+    // if no child, just add
+    if (!child) {
+        node->left = cur;
+        return;
+    }
+
+    // if node has children, find last
+    TreeNode *mostRightNode = child;
     while (mostRightNode->right)
         mostRightNode = mostRightNode->right;
-
-    TreeNode *cur = treeMakeNode(data);
     mostRightNode->right = cur;
 }
 
@@ -77,8 +86,11 @@ void _nodeInOrder(TreeNode *root, Processor1 action)
 {
     if (root != NULL)
     {
+        // visit child
         _nodeInOrder(root->left, action);
+        // visit seft
         action(root->data);
+        // visit sibling
         _nodeInOrder(root->right, action);
     }
 }
