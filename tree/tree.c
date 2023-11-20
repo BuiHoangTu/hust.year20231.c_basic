@@ -1,4 +1,6 @@
 #include "tree/tree.h"
+#include "list/stack.h"
+#include "list/single_linked_list.h"
 
 TreeNode *treeMakeNode(void *data)
 {
@@ -64,22 +66,43 @@ void treeAddLastChild(TreeNode *node, void *data)
     mostRightNode->right = cur;
 }
 
-void _nodePreOrder(TreeNode *root, Processor1 action)
-{
-    if (root != NULL)
-    {
-        action(root->data);
-        _nodePreOrder(root->left, action);
-        _nodePreOrder(root->right, action);
-    }
-}
-
 void treePreOrder(Tree *t, Processor1 action)
 {
-    if (t)
-    {
-        _nodePreOrder(t->root, action);
+    // check the tree
+    if (!t) return;
+    TreeNode *root = t->root;
+    if (!root) return;
+
+    // stack of node
+    Stack *stackOfTop = stack_create();
+    stack_push(stackOfTop, root);
+
+    // the data in preorder will be stored here
+    SingleLinkedList *dataInPreOrder = sll_create();
+
+    while (stackOfTop->length > 0) {
+        // get node add to back of data list
+        TreeNode *node = (TreeNode*) stack_pop(stackOfTop);
+        sll_add_last(dataInPreOrder, node->data);
+
+        // push all child in revert order
+        TreeNode *child = node->left;
+        Stack *revertor = stack_create();
+        while (child) {
+            stack_push(revertor, child);
+            // go to next sibling;
+            child = child->right;
+        }
+        while (revertor->length > 0) stack_push(stackOfTop, stack_pop(revertor));
+        stack_free(revertor);
     }
+
+    sll_foreach(data, dataInPreOrder) {
+        action(data);
+    }
+
+    sll_free(dataInPreOrder);
+    stack_free(stackOfTop);
 }
 
 void _nodeInOrder(TreeNode *root, Processor1 action)
