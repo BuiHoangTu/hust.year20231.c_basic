@@ -84,27 +84,24 @@ void treePreOrder(Tree *t, Processor1 action)
 
 void _nodeInOrder(TreeNode *root, Processor1 action)
 {
-    if (root != NULL)
-    {
+    if (root != NULL) {
         // visit first child
         TreeNode *firstChild = root->left;
-        TreeNode *notLast = firstChild;
-        if (firstChild != NULL) {
-            // last will have right siblings
-            while (notLast->right != NULL) {
-                _nodeInOrder(notLast, action);
-                // next siblings
-                notLast = notLast->right;
-            }
-        }
-        // it has travel to last
-        TreeNode *last = notLast;
+        _nodeInOrder(firstChild, action);
 
         // visit seft
         action(root->data);
 
-        // visit last
-        _nodeInOrder(last, action);
+        // the rest
+        if (firstChild != NULL) {
+            TreeNode *rest = firstChild->right;
+
+            while (rest != NULL) {
+                _nodeInOrder(rest, action);
+                // next siblings
+                rest = rest->right;
+            }
+        }
     }
 }
 
