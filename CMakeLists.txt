@@ -41,6 +41,8 @@ add_library(minilib
         tree/binary_tree.h
         tree/tree.c
         tree/tree.h
+        sort/selection_sort.c
+        sort/selection_sort.h
 )
 
 
