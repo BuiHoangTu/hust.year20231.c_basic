@@ -92,22 +92,20 @@ void *__sll_remove_node(SingleLinkedList *list, SingleLinkedNode *node, SingleLi
 	if (prevNode == NULL)
 	{
 		list->first = node->next;
-		list->length--;
 	}
 	// node is the last node
 	else if (node->next == NULL)
 	{
 		prevNode->next = NULL;
 		list->last = prevNode;
-		list->length--;
 	}
 	// node is in the middle 
 	else
 	{
 		prevNode->next = node->next;
-		list->length--;
 	}
 
+    list->length--;
 	void *value = node->value;
 	free(node);
 	return value;
