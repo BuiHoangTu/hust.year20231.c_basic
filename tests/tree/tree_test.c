@@ -70,4 +70,37 @@ int main() {
     treePreOrder(tree, print_data_as_int);
     printf("\n");
 
+    i = 3;
+    parent = treeFindNode(&i, tree, int_cmp);
+    i = 2;
+    treeAddLastChild(parent, copy2heap(&i, sizeof(int)));
+    i = 7;
+    treeAddLastChild(parent, copy2heap(&i, sizeof(int)));
+
+    i = 4;
+    parent = treeFindNode(&i, tree, int_cmp);
+    i = 6;
+    treeAddLastChild(parent, copy2heap(&i, sizeof(int)));
+    i = 9;
+    treeAddLastChild(parent, copy2heap(&i, sizeof(int)));
+
+    /**
+     * tree
+     * 10
+     * |-- 11
+     *   |-- 5
+     *   |-- 4
+     *     |-- 6
+     *     |-- 9
+     * |-- 1
+     * |-- 3
+     *   |-- 8
+     *   |-- 2
+     *   |-- 7
+     */
+    treeInOrder(tree, print_data_as_int);
+    printf("\n");
+
+    treePostOrder(tree, print_data_as_int);
+    printf("\n");
 }

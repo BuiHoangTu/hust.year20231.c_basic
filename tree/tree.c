@@ -1,6 +1,7 @@
 #include "tree/tree.h"
 #include "list/stack.h"
 #include "list/single_linked_list.h"
+#include "stdlib.h"
 
 TreeNode *treeMakeNode(void *data)
 {
@@ -105,12 +106,12 @@ void treePreOrder(Tree *t, Processor1 action)
     stack_free(stackOfTop);
 }
 
-void _nodeInOrder(TreeNode *root, Processor1 action)
+void nodeInOrder(TreeNode *root, Processor1 action)
 {
     if (root != NULL) {
         // visit first child
         TreeNode *firstChild = root->left;
-        _nodeInOrder(firstChild, action);
+        nodeInOrder(firstChild, action);
 
         // visit seft
         action(root->data);
@@ -120,7 +121,7 @@ void _nodeInOrder(TreeNode *root, Processor1 action)
             TreeNode *rest = firstChild->right;
 
             while (rest != NULL) {
-                _nodeInOrder(rest, action);
+                nodeInOrder(rest, action);
                 // next siblings
                 rest = rest->right;
             }
@@ -132,24 +133,82 @@ void treeInOrder(Tree *t, Processor1 action)
 {
     if (t)
     {
-        _nodeInOrder(t->root, action);
+        nodeInOrder(t->root, action);
     }
 }
 
-void _nodePostOrder(TreeNode *root, Processor1 action)
-{
-    if (root != NULL)
-    {
-        _nodePostOrder(root->left, action);
-        _nodePostOrder(root->right, action);
-        action(root->data);
+int childrenCount(TreeNode *node) {
+    int count = 0;
+    TreeNode *child = node->left;
+    while (child) {
+        count++;
+        child = child->right;
     }
+    return count;
+}
+
+TreeNode *getChild(TreeNode *parent, int index) {
+    TreeNode *child = parent->left;
+    for (int i = 0; i < index; i ++) {
+        if (!child) break;
+        child = child->right;
+    }
+    return child;
+}
+
+void nodePostOrder(TreeNode *root, Processor1 action)
+{
+    Stack *nodeStack = stack_create();
+    Stack *indexStack = stack_create();
+    int rootIndex = 0;
+    SingleLinkedList *list = sll_create();
+
+    while (root || nodeStack->length > 0) {
+        if (root) {
+            stack_push(nodeStack, root);
+            stack_push(indexStack, copy2heap(&rootIndex, sizeof(int)));
+            rootIndex = 0;
+
+            // move to child
+            root = root->left;
+            continue; // continue until no more first child
+        }
+
+        TreeNode *node = (TreeNode*)stack_pop(nodeStack);
+        int *nodeIndex = (int*) stack_pop(indexStack);
+
+        sll_add_last(list, node->data);
+
+        // pop all children of a node
+        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode*) stack_peek(nodeStack)) - 1) {
+            node = (TreeNode*)stack_pop(nodeStack);
+            free(nodeIndex);
+            nodeIndex = (int*) stack_pop(indexStack);
+
+            sll_add_last(list, node->data);
+        }
+
+        // if there is another layer assign the root
+        if (nodeStack->length > 0) {
+            root = getChild(((TreeNode *) stack_peek(nodeStack)), *nodeIndex + 1);
+            rootIndex = *nodeIndex + 1;
+        }
+        free(nodeIndex);
+    }
+
+    sll_foreach(o, list) {
+        action(o);
+    }
+
+    stack_free(nodeStack);
+    stack_free(indexStack);
+    sll_free(list);
 }
 
 void treePostOrder(Tree *t, Processor1 action)
 {
     if (t)
     {
-        _nodePostOrder(t->root, action);
+        nodePostOrder(t->root, action);
     }
 }
