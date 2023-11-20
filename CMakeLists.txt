@@ -25,7 +25,9 @@ endif()
 add_library(minilib
         array/array_list.c
         array/array_list.h
+        core/heap.c
         core/heap.h
+        core/type.c
         core/type.h
         list/double_linked_list.c
         list/double_linked_list.h

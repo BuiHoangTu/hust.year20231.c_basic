@@ -8,11 +8,6 @@
 
 #define void2(type, pointer) (*((type *)pointer))
 
-void *copy2heap(void *data, size_t data_size)
-{
-    void *p = malloc(data_size);
-    memcpy(p, data, data_size);
-    return p;
-}
+void *copy2heap(void *data, size_t data_size);
 
 #endif // HEAP_H_

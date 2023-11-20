@@ -17,12 +17,6 @@ typedef void (*Processor1)(void *);
 /**
  *
  */
-int intCmp(void *v1, void *v2)
-{
-    int i1 = void2(int, v1);
-    int i2 = void2(int, v2);
-
-    return i1 - i2;
-}
+int intCmp(void *v1, void *v2);
 
 #endif // TYPE_H_
