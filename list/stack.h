@@ -17,4 +17,4 @@ void* stack_peek(Stack* stack);
 void stack_free(Stack* stack);
 
 
-#endif // !STACK_H_
+#endif // STACK_H_

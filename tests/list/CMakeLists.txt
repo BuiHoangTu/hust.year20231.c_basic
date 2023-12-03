@@ -1,0 +1,2 @@
+add_executable(stack_test stack_test.c)
+target_link_libraries(stack_test minilib)

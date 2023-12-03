@@ -43,6 +43,10 @@ add_library(minilib
         tree/tree.h
         sort/selection_sort.c
         sort/selection_sort.h
+        sort/merge_sort.c
+        sort/merge_sort.h
+        sort/heap_sort.c
+        sort/heap_sort.h
 )
 
 ### test ###
