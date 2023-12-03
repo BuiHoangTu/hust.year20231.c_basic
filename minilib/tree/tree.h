@@ -46,4 +46,8 @@ void treeInOrder(Tree *t, Processor1 action);
 
 void treePostOrder(Tree *t, Processor1 action);
 
+long treeHeight(Tree *tree);
+
+long treeDepth(Tree *tree);
+
 #endif // TREE_H_

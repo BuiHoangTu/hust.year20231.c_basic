@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3)
 project(mini_library VERSION 0.0.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)

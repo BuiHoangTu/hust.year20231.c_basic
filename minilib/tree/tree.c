@@ -212,3 +212,25 @@ void treePostOrder(Tree *t, Processor1 action)
         nodePostOrder(t->root, action);
     }
 }
+
+long nodeHeight(TreeNode *node) {
+    long childHeight = 0;
+
+    // iterate children and get max height
+    TreeNode *child = node->left;
+    while (child) {
+        long currentHeight = nodeHeight(child);
+        childHeight = childHeight > currentHeight ? childHeight : currentHeight;
+        child = child->right;
+    }
+
+    return childHeight + 1;
+}
+
+long treeHeight(Tree *tree) {
+    return nodeHeight(tree->root);
+}
+
+long treeDepth(Tree *tree) {
+    return 0;
+}
