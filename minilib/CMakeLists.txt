@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3)
+cmake_minimum_required(VERSION 3.22)
 project(mini_library VERSION 0.0.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
@@ -47,6 +47,8 @@ add_library(minilib
         sort/merge_sort.h
         sort/heap_sort.c
         sort/heap_sort.h
+        search/binary_search.c
+        search/binary_search.h
 )
 
 ### test ###

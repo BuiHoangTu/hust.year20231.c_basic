@@ -48,6 +48,6 @@ void treePostOrder(Tree *t, Processor1 action);
 
 long treeHeight(Tree *tree);
 
-long treeDepth(Tree *tree);
+long treeNodeDepth(Tree *tree, void *data, CompareFunction compareFunction);
 
 #endif // TREE_H_

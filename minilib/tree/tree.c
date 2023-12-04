@@ -3,50 +3,42 @@
 #include "list/single_linked_list.h"
 #include "stdlib.h"
 
-TreeNode *treeMakeNode(void *data)
-{
+TreeNode *treeMakeNode(void *data) {
     quickCalloc(TreeNode, node);
     node->data = data;
     return node;
 }
 
-Tree *treeMakeTree(TreeNode *root)
-{
+Tree *treeMakeTree(TreeNode *root) {
     quickCalloc(Tree, tree);
     tree->root = root;
     return tree;
 }
 
-TreeNode *_rootFindNode(void *data, TreeNode *root, CompareFunction func)
-{
+TreeNode *_rootFindNode(void *data, TreeNode *root, CompareFunction func) {
     if (!root)
         return NULL;
 
-    if (func(root->data, data) == 0)
-    {
+    if (func(root->data, data) == 0) {
         return root;
-    }
-    else
-    {
+    } else {
         // find in right
         TreeNode *right = _rootFindNode(data, root->right, func);
         if (right != NULL)
             return right;
-        // if nothing in right, try in deeper lv
+            // if nothing in right, try in deeper lv
         else
             return _rootFindNode(data, root->left, func);
     }
 }
 
-TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func)
-{
+TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func) {
     if (!tree || !func)
         return NULL;
     return _rootFindNode(data, tree->root, func);
 }
 
-void treeAddLastChild(TreeNode *node, void *data)
-{
+void treeAddLastChild(TreeNode *node, void *data) {
     if (!node)
         return;
 
@@ -67,8 +59,7 @@ void treeAddLastChild(TreeNode *node, void *data)
     mostRightNode->right = cur;
 }
 
-void treePreOrder(Tree *t, Processor1 action)
-{
+void treePreOrder(Tree *t, Processor1 action) {
     // check the tree
     if (!t) return;
     TreeNode *root = t->root;
@@ -83,7 +74,7 @@ void treePreOrder(Tree *t, Processor1 action)
 
     while (stackOfTop->length > 0) {
         // get node add to back of data list
-        TreeNode *node = (TreeNode*) stack_pop(stackOfTop);
+        TreeNode *node = (TreeNode *) stack_pop(stackOfTop);
         sll_add_last(dataInPreOrder, node->data);
 
         // push all child in revert order
@@ -106,8 +97,7 @@ void treePreOrder(Tree *t, Processor1 action)
     stack_free(stackOfTop);
 }
 
-void nodeInOrder(TreeNode *root, Processor1 action)
-{
+void nodeInOrder(TreeNode *root, Processor1 action) {
     if (root != NULL) {
         // visit first child
         TreeNode *firstChild = root->left;
@@ -129,10 +119,8 @@ void nodeInOrder(TreeNode *root, Processor1 action)
     }
 }
 
-void treeInOrder(Tree *t, Processor1 action)
-{
-    if (t)
-    {
+void treeInOrder(Tree *t, Processor1 action) {
+    if (t) {
         nodeInOrder(t->root, action);
     }
 }
@@ -149,15 +137,14 @@ int childrenCount(TreeNode *node) {
 
 TreeNode *getChild(TreeNode *parent, int index) {
     TreeNode *child = parent->left;
-    for (int i = 0; i < index; i ++) {
+    for (int i = 0; i < index; i++) {
         if (!child) break;
         child = child->right;
     }
     return child;
 }
 
-void nodePostOrder(TreeNode *root, Processor1 action)
-{
+void nodePostOrder(TreeNode *root, Processor1 action) {
     Stack *nodeStack = stack_create();
     Stack *indexStack = stack_create();
     int rootIndex = 0;
@@ -174,16 +161,16 @@ void nodePostOrder(TreeNode *root, Processor1 action)
             continue; // continue until no more first child
         }
 
-        TreeNode *node = (TreeNode*)stack_pop(nodeStack);
-        int *nodeIndex = (int*) stack_pop(indexStack);
+        TreeNode *node = (TreeNode *) stack_pop(nodeStack);
+        int *nodeIndex = (int *) stack_pop(indexStack);
 
         sll_add_last(list, node->data);
 
         // pop all children of a node
-        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode*) stack_peek(nodeStack)) - 1) {
-            node = (TreeNode*)stack_pop(nodeStack);
+        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode *) stack_peek(nodeStack)) - 1) {
+            node = (TreeNode *) stack_pop(nodeStack);
             free(nodeIndex);
-            nodeIndex = (int*) stack_pop(indexStack);
+            nodeIndex = (int *) stack_pop(indexStack);
 
             sll_add_last(list, node->data);
         }
@@ -205,10 +192,8 @@ void nodePostOrder(TreeNode *root, Processor1 action)
     sll_free(list);
 }
 
-void treePostOrder(Tree *t, Processor1 action)
-{
-    if (t)
-    {
+void treePostOrder(Tree *t, Processor1 action) {
+    if (t) {
         nodePostOrder(t->root, action);
     }
 }
@@ -231,6 +216,27 @@ long treeHeight(Tree *tree) {
     return nodeHeight(tree->root);
 }
 
-long treeDepth(Tree *tree) {
-    return 0;
+long _treeNodeDepth(TreeNode *node, long current, void *data, CompareFunction compare) {
+    if (!node)
+        return -1;
+
+    if (compare(node->data, data) == 0) {
+        return current;
+    } else {
+        // find in right
+        long right = _treeNodeDepth(data, current + 1, node->right, compare);
+        if (right != -1)
+            return right;
+            // if nothing in right, try in deeper lv
+        else
+            return _treeNodeDepth(data, current + 1, node->left, compare);
+    }
 }
+
+
+long treeNodeDepth(Tree *tree, void *data, CompareFunction compare) {
+    if (!tree) return -1;
+
+    return _treeNodeDepth(tree->root, 0, data, compare);
+}
+
