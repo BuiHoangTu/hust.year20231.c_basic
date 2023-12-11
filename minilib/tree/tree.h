@@ -40,11 +40,11 @@ TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func);
 /// <param name="data"></param>
 void treeAddLastChild(TreeNode *node, void *data);
 
-void treePreOrder(Tree *t, Processor1 action);
+void treePreOrder(Tree *t, Consume1 action);
 
-void treeInOrder(Tree *t, Processor1 action);
+void treeInOrder(Tree *t, Consume1 action);
 
-void treePostOrder(Tree *t, Processor1 action);
+void treePostOrder(Tree *t, Consume1 action);
 
 long treeHeight(Tree *tree);
 

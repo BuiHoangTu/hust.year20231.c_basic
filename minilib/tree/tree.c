@@ -59,7 +59,7 @@ void treeAddLastChild(TreeNode *node, void *data) {
     mostRightNode->right = cur;
 }
 
-void treePreOrder(Tree *t, Processor1 action) {
+void treePreOrder(Tree *t, Consume1 action) {
     // check the tree
     if (!t) return;
     TreeNode *root = t->root;
@@ -97,7 +97,7 @@ void treePreOrder(Tree *t, Processor1 action) {
     stack_free(stackOfTop);
 }
 
-void nodeInOrder(TreeNode *root, Processor1 action) {
+void nodeInOrder(TreeNode *root, Consume1 action) {
     if (root != NULL) {
         // visit first child
         TreeNode *firstChild = root->left;
@@ -119,7 +119,7 @@ void nodeInOrder(TreeNode *root, Processor1 action) {
     }
 }
 
-void treeInOrder(Tree *t, Processor1 action) {
+void treeInOrder(Tree *t, Consume1 action) {
     if (t) {
         nodeInOrder(t->root, action);
     }
@@ -144,7 +144,7 @@ TreeNode *getChild(TreeNode *parent, int index) {
     return child;
 }
 
-void nodePostOrder(TreeNode *root, Processor1 action) {
+void nodePostOrder(TreeNode *root, Consume1 action) {
     Stack *nodeStack = stack_create();
     Stack *indexStack = stack_create();
     int rootIndex = 0;
@@ -192,7 +192,7 @@ void nodePostOrder(TreeNode *root, Processor1 action) {
     sll_free(list);
 }
 
-void treePostOrder(Tree *t, Processor1 action) {
+void treePostOrder(Tree *t, Consume1 action) {
     if (t) {
         nodePostOrder(t->root, action);
     }

@@ -8,14 +8,24 @@
  */
 typedef int (*CompareFunction)(void *, void *);
 
+/**
+ * An action
+ */
 typedef void (*Action)();
 
-typedef void (*Processor0)();
-
-typedef void (*Processor1)(void *);
+/**
+ * Consume 1 void data to do something <br>
+ * Ex: free pointer, print pointer
+ */
+typedef void (*Consume1)(void *);
 
 /**
- *
+ * Hash a void data
+ */
+typedef int (*HashFunction)(void *);
+
+/**
+ * Compare 2 data
  */
 int intCmp(void *v1, void *v2);
 

@@ -49,6 +49,10 @@ add_library(minilib
         sort/heap_sort.h
         search/binary_search.c
         search/binary_search.h
+        map/hash_map.c
+        map/hash_map.h
+        core/hash.h
+        core/hash.c
 )
 
 ### test ###

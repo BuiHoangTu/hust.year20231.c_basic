@@ -11,12 +11,12 @@
 
 void *copy2heap(void *data, size_t data_size);
 
-void *copy2heap(void *data, size_t data_size)
-{
+void *copy2heap(void *data, size_t data_size) {
     void *p = malloc(data_size);
     memcpy(p, data, data_size);
     return p;
 }
+
 #endif // HEAP_H_
 
 #ifndef TYPE_H_
@@ -29,17 +29,14 @@ typedef int (*CompareFunction)(void *, void *);
 
 typedef void (*Action)();
 
-typedef void (*Processor0)();
-
-typedef void (*Processor1)(void *);
+typedef void (*Consume1)(void *);
 
 /**
  *
  */
 int intCmp(void *v1, void *v2);
 
-int intCmp(void *v1, void *v2)
-{
+int intCmp(void *v1, void *v2) {
     int i1 = void2(int, v1);
     int i2 = void2(int, v2);
 
@@ -53,17 +50,15 @@ int intCmp(void *v1, void *v2)
 
 #include <stdlib.h>
 
-typedef struct sln
-{
-	void *value;
-	struct sln *next;
+typedef struct sln {
+    void *value;
+    struct sln *next;
 } SingleLinkedNode;
 
-typedef struct sll
-{
-	int length;
-	SingleLinkedNode *first;
-	SingleLinkedNode *last;
+typedef struct sll {
+    int length;
+    SingleLinkedNode *first;
+    SingleLinkedNode *last;
 } SingleLinkedList;
 
 /**
@@ -102,92 +97,81 @@ void *sll_remove(SingleLinkedList *list, int index);
 int sll_next(SingleLinkedNode **node, void **obj);
 
 #define sll_foreach(obj, list)             \
-	SingleLinkedNode *_node = list->first; \
-	void *obj;                             \
-	while (sll_next(&_node, &obj))
+    SingleLinkedNode *_node = list->first; \
+    void *obj;                             \
+    while (sll_next(&_node, &obj))
 
-void sll_free(SingleLinkedList* list);
+void sll_free(SingleLinkedList *list);
 
 
-SingleLinkedList *sll_create()
-{
-	SingleLinkedList *list = (SingleLinkedList *)malloc(sizeof(SingleLinkedList));
-	list->first = NULL;
-	list->last = NULL;
-	list->length = 0;
+SingleLinkedList *sll_create() {
+    SingleLinkedList *list = (SingleLinkedList *) malloc(sizeof(SingleLinkedList));
+    list->first = NULL;
+    list->last = NULL;
+    list->length = 0;
 
-	return list;
+    return list;
 }
 
 /**
  * Get node at index
  */
-SingleLinkedNode *__sll_get_node(SingleLinkedList *list, int index)
-{
-	if (index >= list->length) return NULL;
+SingleLinkedNode *__sll_get_node(SingleLinkedList *list, int index) {
+    if (index >= list->length) return NULL;
 
-	SingleLinkedNode *current = list->first;
-	for (int i = 0; i < index; i++)
-	{
-		current = current->next;
-	}
+    SingleLinkedNode *current = list->first;
+    for (int i = 0; i < index; i++) {
+        current = current->next;
+    }
 
-	return current;
+    return current;
 }
 
 /**
  * add node to the last, increase length
  */
-void __sll_add_node_last(SingleLinkedList *list, SingleLinkedNode *node)
-{
-	// increase length
-	list->length++;
-	// if empty list
-	if (list->first == NULL)
-	{
-		// add node to both first and last
-		list->first = list->last = node;
-	}
-	else // add node after last
-	{
-		list->last->next = node;
-		list->last = node;
-	}
+void __sll_add_node_last(SingleLinkedList *list, SingleLinkedNode *node) {
+    // increase length
+    list->length++;
+    // if empty list
+    if (list->first == NULL) {
+        // add node to both first and last
+        list->first = list->last = node;
+    } else // add node after last
+    {
+        list->last->next = node;
+        list->last = node;
+    }
 }
 
 /**
  * insert node at index, increase length
  */
-int __sll_insert_node(SingleLinkedList *list, SingleLinkedNode *node, int index)
-{
-	if (index > list->length) return 0;
+int __sll_insert_node(SingleLinkedList *list, SingleLinkedNode *node, int index) {
+    if (index > list->length) return 0;
 
-	// if insert at first
-	if (index == 0)
-	{
-		node->next = list->first;
-		list->first = node;
-		list->length++;
-		return 1;
-	}
-	// insert last 
-	else if (index == list->length)
-	{
-		// this function increase already
-		__sll_add_node_last(list, node);
-		return 1;
-	} 
-	else
-	{
-		// add node at middle
-		SingleLinkedNode *current = __sll_get_node(list, index - 1);
-		// add next node
-		node->next = current->next;
-		// add this node
-		current->next = node;
-		list->length++;
-		return 1;
-	}
+    // if insert at first
+    if (index == 0) {
+        node->next = list->first;
+        list->first = node;
+        list->length++;
+        return 1;
+    }
+        // insert last
+    else if (index == list->length) {
+        // this function increase already
+        __sll_add_node_last(list, node);
+        return 1;
+    } else {
+        // add node at middle
+        SingleLinkedNode *current = __sll_get_node(list, index - 1);
+        // add next node
+        node->next = current->next;
+        // add this node
+        current->next = node;
+        list->length++;
+        return 1;
+    }
 }
 
 /**
@@ -195,75 +179,64 @@ int __sll_insert_node(SingleLinkedList *list, SingleLinkedNode *node, int index)
  * @param prevNode: the node before the node need removing
  * @return value that the node holds
  */
-void *__sll_remove_node(SingleLinkedList *list, SingleLinkedNode *node, SingleLinkedNode *prevNode)
-{
-	// node is first node
-	if (prevNode == NULL)
-	{
-		list->first = node->next;
-	}
-	// node is the last node
-	else if (node->next == NULL)
-	{
-		prevNode->next = NULL;
-		list->last = prevNode;
-	}
-	// node is in the middle 
-	else
-	{
-		prevNode->next = node->next;
-	}
+void *__sll_remove_node(SingleLinkedList *list, SingleLinkedNode *node, SingleLinkedNode *prevNode) {
+    // node is first node
+    if (prevNode == NULL) {
+        list->first = node->next;
+    }
+        // node is the last node
+    else if (node->next == NULL) {
+        prevNode->next = NULL;
+        list->last = prevNode;
+    }
+        // node is in the middle
+    else {
+        prevNode->next = node->next;
+    }
 
     list->length--;
-	void *value = node->value;
-	free(node);
-	return value;
+    void *value = node->value;
+    free(node);
+    return value;
 }
 
-SingleLinkedNode *sln_create(void *value)
-{
-	SingleLinkedNode *node = (SingleLinkedNode *)malloc(sizeof(SingleLinkedNode));
-	node->next = NULL;
-	node->value = value;
-	return node;
+SingleLinkedNode *sln_create(void *value) {
+    SingleLinkedNode *node = (SingleLinkedNode *) malloc(sizeof(SingleLinkedNode));
+    node->next = NULL;
+    node->value = value;
+    return node;
 }
 
-void sll_add_last(SingleLinkedList *list, void *value)
-{
-	SingleLinkedNode *newNode = sln_create(value);
-	__sll_add_node_last(list, newNode);
+void sll_add_last(SingleLinkedList *list, void *value) {
+    SingleLinkedNode *newNode = sln_create(value);
+    __sll_add_node_last(list, newNode);
 }
 
-int sll_insert(SingleLinkedList *list, void *value, int index)
-{
-	SingleLinkedNode *newNode = sln_create(value);
-	return __sll_insert_node(list, newNode, index);
+int sll_insert(SingleLinkedList *list, void *value, int index) {
+    SingleLinkedNode *newNode = sln_create(value);
+    return __sll_insert_node(list, newNode, index);
 }
 
-void *sll_get(SingleLinkedList *list, int index)
-{
-	SingleLinkedNode* node = __sll_get_node(list, index);
-	return node == NULL ? NULL : node->value;
+void *sll_get(SingleLinkedList *list, int index) {
+    SingleLinkedNode *node = __sll_get_node(list, index);
+    return node == NULL ? NULL : node->value;
 }
 
-void *sll_remove(SingleLinkedList *list, int index)
-{
-	if (index >= list->length)
-		return NULL;
+void *sll_remove(SingleLinkedList *list, int index) {
+    if (index >= list->length)
+        return NULL;
 
-	if (index == 0)
-	{
-		return __sll_remove_node(list, list->first, NULL);
-	}
+    if (index == 0) {
+        return __sll_remove_node(list, list->first, NULL);
+    }
 
-	SingleLinkedNode *prev = __sll_get_node(list, index - 1);
-	SingleLinkedNode *current = prev->next;
+    SingleLinkedNode *prev = __sll_get_node(list, index - 1);
+    SingleLinkedNode *current = prev->next;
 
-	return __sll_remove_node(list, current, prev);
+    return __sll_remove_node(list, current, prev);
 }
 
-int sll_next(SingleLinkedNode **node, void **obj)
-{
+int sll_next(SingleLinkedNode **node, void **obj) {
     if ((*node) == NULL)
         return 0;
 
@@ -273,9 +246,8 @@ int sll_next(SingleLinkedNode **node, void **obj)
     return 1;
 }
 
-void sll_free(SingleLinkedList *list)
-{
-	free(list);
+void sll_free(SingleLinkedList *list) {
+    free(list);
 }
 
 #endif // SLL_H_
@@ -286,34 +258,34 @@ void sll_free(SingleLinkedList *list)
 
 #define Queue SingleLinkedList
 
-Queue* queue_create();
+Queue *queue_create();
 
-void enqueue(Queue* queue, void* value);
+void enqueue(Queue *queue, void *value);
 
-void* dequeue(Queue* queue);
+void *dequeue(Queue *queue);
 
-void* queue_peek(Queue* queue);
+void *queue_peek(Queue *queue);
 
-void queue_free(Queue* queue);
+void queue_free(Queue *queue);
 
 
-Queue* queue_create() {
+Queue *queue_create() {
     return sll_create();
 }
 
-void enqueue(Queue* queue, void* value) {
+void enqueue(Queue *queue, void *value) {
     sll_add_last(queue, value);
 }
 
-void* dequeue(Queue* queue) {
+void *dequeue(Queue *queue) {
     return sll_remove(queue, 0);
 }
 
-void* queue_peek(Queue* queue) {
+void *queue_peek(Queue *queue) {
     return sll_get(queue, 0);
 }
 
-void queue_free(Queue* queue) {
+void queue_free(Queue *queue) {
     sll_free(queue);
 }
 
@@ -324,33 +296,33 @@ void queue_free(Queue* queue) {
 
 #define Stack SingleLinkedList
 
-Stack* stack_create();
+Stack *stack_create();
 
-void stack_push(Stack* stack, void* value);
+void stack_push(Stack *stack, void *value);
 
-void* stack_pop(Stack* stack);
+void *stack_pop(Stack *stack);
 
-void* stack_peek(Stack* stack);
+void *stack_peek(Stack *stack);
 
-void stack_free(Stack* stack);
+void stack_free(Stack *stack);
 
-Stack* stack_create() {
+Stack *stack_create() {
     return sll_create();
 }
 
-void stack_push(Stack* stack, void* value) {
+void stack_push(Stack *stack, void *value) {
     sll_insert(stack, value, 0);
 }
 
-void* stack_pop(Stack* stack) {
+void *stack_pop(Stack *stack) {
     return sll_remove(stack, 0);
 }
 
-void* stack_peek(Stack* stack) {
+void *stack_peek(Stack *stack) {
     return sll_get(stack, 0);
 }
 
-void stack_free(Stack* stack) {
+void stack_free(Stack *stack) {
     sll_free(stack);
 }
 
@@ -410,57 +382,49 @@ TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func);
 /// <param name="data"></param>
 void treeAddLastChild(TreeNode *node, void *data);
 
-void treePreOrder(Tree *t, Processor1 action);
+void treePreOrder(Tree *t, Consume1 action);
 
-void treeInOrder(Tree *t, Processor1 action);
+void treeInOrder(Tree *t, Consume1 action);
 
-void treePostOrder(Tree *t, Processor1 action);
+void treePostOrder(Tree *t, Consume1 action);
 
 
-TreeNode *treeMakeNode(void *data)
-{
+TreeNode *treeMakeNode(void *data) {
     quickCalloc(TreeNode, node);
     node->data = data;
     return node;
 }
 
-Tree *treeMakeTree(TreeNode *root)
-{
+Tree *treeMakeTree(TreeNode *root) {
     quickCalloc(Tree, tree);
     tree->root = root;
     return tree;
 }
 
-TreeNode *_rootFindNode(void *data, TreeNode *root, CompareFunction func)
-{
+TreeNode *_rootFindNode(void *data, TreeNode *root, CompareFunction func) {
     if (!root)
         return NULL;
 
-    if (func(root->data, data) == 0)
-    {
+    if (func(root->data, data) == 0) {
         return root;
-    }
-    else
-    {
+    } else {
         // find in right
         TreeNode *right = _rootFindNode(data, root->right, func);
         if (right != NULL)
             return right;
-        // if nothing in right, try in deeper lv
+            // if nothing in right, try in deeper lv
         else
             return _rootFindNode(data, root->left, func);
     }
 }
 
-TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func)
-{
+TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func) {
     if (!tree || !func)
         return NULL;
     return _rootFindNode(data, tree->root, func);
 }
 
-void treeAddLastChild(TreeNode *node, void *data)
-{
+void treeAddLastChild(TreeNode *node, void *data) {
     if (!node)
         return;
 
@@ -481,8 +445,7 @@ void treeAddLastChild(TreeNode *node, void *data)
     mostRightNode->right = cur;
 }
 
-void treePreOrder(Tree *t, Processor1 action)
-{
+void treePreOrder(Tree *t, Consume1 action) {
     // check the tree
     if (!t) return;
     TreeNode *root = t->root;
@@ -497,7 +460,7 @@ void treePreOrder(Tree *t, Processor1 action)
 
     while (stackOfTop->length > 0) {
         // get node add to back of data list
-        TreeNode *node = (TreeNode*) stack_pop(stackOfTop);
+        TreeNode *node = (TreeNode *) stack_pop(stackOfTop);
         sll_add_last(dataInPreOrder, node->data);
 
         // push all child in revert order
@@ -520,8 +483,7 @@ void treePreOrder(Tree *t, Processor1 action)
     stack_free(stackOfTop);
 }
 
-void nodeInOrder(TreeNode *root, Processor1 action)
-{
+void nodeInOrder(TreeNode *root, Consume1 action) {
     if (root != NULL) {
         // visit first child
         TreeNode *firstChild = root->left;
@@ -543,10 +505,8 @@ void nodeInOrder(TreeNode *root, Processor1 action)
     }
 }
 
-void treeInOrder(Tree *t, Processor1 action)
-{
-    if (t)
-    {
+void treeInOrder(Tree *t, Consume1 action) {
+    if (t) {
         nodeInOrder(t->root, action);
     }
 }
@@ -563,15 +523,14 @@ int childrenCount(TreeNode *node) {
 
 TreeNode *getChild(TreeNode *parent, int index) {
     TreeNode *child = parent->left;
-    for (int i = 0; i < index; i ++) {
+    for (int i = 0; i < index; i++) {
         if (!child) break;
         child = child->right;
     }
     return child;
 }
 
-void nodePostOrder(TreeNode *root, Processor1 action)
-{
+void nodePostOrder(TreeNode *root, Consume1 action) {
     Stack *nodeStack = stack_create();
     Stack *indexStack = stack_create();
     int rootIndex = 0;
@@ -588,16 +547,16 @@ void nodePostOrder(TreeNode *root, Processor1 action)
             continue; // continue until no more first child
         }
 
-        TreeNode *node = (TreeNode*)stack_pop(nodeStack);
-        int *nodeIndex = (int*) stack_pop(indexStack);
+        TreeNode *node = (TreeNode *) stack_pop(nodeStack);
+        int *nodeIndex = (int *) stack_pop(indexStack);
 
         sll_add_last(list, node->data);
 
         // pop all children of a node
-        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode*) stack_peek(nodeStack)) - 1) {
-            node = (TreeNode*)stack_pop(nodeStack);
+        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode *) stack_peek(nodeStack)) - 1) {
+            node = (TreeNode *) stack_pop(nodeStack);
             free(nodeIndex);
-            nodeIndex = (int*) stack_pop(indexStack);
+            nodeIndex = (int *) stack_pop(indexStack);
 
             sll_add_last(list, node->data);
         }
@@ -619,27 +578,69 @@ void nodePostOrder(TreeNode *root, Processor1 action)
     sll_free(list);
 }
 
-void treePostOrder(Tree *t, Processor1 action)
-{
-    if (t)
-    {
+void treePostOrder(Tree *t, Consume1 action) {
+    if (t) {
         nodePostOrder(t->root, action);
     }
 }
+
+long nodeHeight(TreeNode *node) {
+    long childHeight = 0;
+
+    // iterate children and get max height
+    TreeNode *child = node->left;
+    while (child) {
+        long currentHeight = nodeHeight(child);
+        childHeight = childHeight > currentHeight ? childHeight : currentHeight;
+        child = child->right;
+    }
+
+    return childHeight + 1;
+}
+
+long treeHeight(Tree *tree) {
+    return nodeHeight(tree->root);
+}
+
+long _treeNodeDepth(TreeNode *node, long current, void *data, CompareFunction compare) {
+    if (!node)
+        return -1;
+
+    if (compare(node->data, data) == 0) {
+        return current;
+    } else {
+        // find in right
+        long right = _treeNodeDepth(data, current + 1, node->right, compare);
+        if (right != -1)
+            return right;
+            // if nothing in right, try in deeper lv
+        else
+            return _treeNodeDepth(data, current + 1, node->left, compare);
+    }
+}
+
+
+long treeNodeDepth(Tree *tree, void *data, CompareFunction compare) {
+    if (!tree) return -1;
+
+    return _treeNodeDepth(tree->root, 0, data, compare);
+}
+
 #endif // TREE_H_
 
 #ifndef SELECTION_SORT_H_
 #define SELECTION_SORT_H_
+
 #include <stdlib.h>
 
-void selectionSort(void* arr[], size_t arrSize, CompareFunction compareFunction);
+void selectionSort(void *arr[], size_t arrSize, CompareFunction compareFunction);
 
 void selectionSort(void *arr[], size_t arrSize, CompareFunction compareFunction) {
     for (int i = 0; i < arrSize; i++) {
         int minIdx = i;
 
         for (int j = i + 1; j < arrSize; j++) {
-            if (compareFunction(arr[i], arr[j] ) > 0) {
+            if (compareFunction(arr[i], arr[j]) > 0) {
                 minIdx = j;
             }
         }
@@ -656,20 +657,19 @@ void selectionSort(void *arr[], size_t arrSize, CompareFunction compareFunction)
 #define MERGE_SORT_H
 
 
-void mergeSort(void* arr[], int n, CompareFunction compare);
+void mergeSort(void *arr[], int n, CompareFunction compare);
 
 // Merges two sub-arrays of arr[].
 // First subarray is arr[l..m]
 // Second subarray is arr[m+1..r]
-void merge(void *arr[], int l, int m, int r, CompareFunction compare)
-{
+void merge(void *arr[], int l, int m, int r, CompareFunction compare) {
     int i, j, k;
     int n1 = m - l + 1;
     int n2 = r - m;
 
     // Create temp arrays
-    void** L = (void**) malloc(sizeof(void*) * n1);
-    void** R = (void**) malloc(sizeof(void*) * n2);
+    void **L = (void **) malloc(sizeof(void *) * n1);
+    void **R = (void **) malloc(sizeof(void *) * n2);
 
     // Copy data to temp arrays L[] and R[]
     for (i = 0; i < n1; i++)
@@ -685,8 +685,7 @@ void merge(void *arr[], int l, int m, int r, CompareFunction compare)
         if (compare(L[i], R[j]) <= 0) {
             arr[k] = L[i];
             i++;
-        }
-        else {
+        } else {
             arr[k] = R[j];
             j++;
         }
@@ -714,8 +713,7 @@ void merge(void *arr[], int l, int m, int r, CompareFunction compare)
 
 // l is for left index and r is right index of the
 // sub-array of arr to be sorted
-void sortSubArray(void *arr[], int l, int r, CompareFunction pFunction)
-{
+void sortSubArray(void *arr[], int l, int r, CompareFunction pFunction) {
     if (l < r) {
         int m = l + (r - l) / 2;
 
@@ -736,10 +734,10 @@ void mergeSort(void *arr[], int n, CompareFunction compare) {
 
 #ifndef HEAP_SORT_H
 #define HEAP_SORT_H
-void heapSort(void* arr[], size_t arrSize, CompareFunction compareFunction);
 
-void heapify(void *arr[], int n, int i, CompareFunction compare)
-{
+void heapSort(void *arr[], size_t arrSize, CompareFunction compareFunction);
+
+void heapify(void *arr[], int n, int i, CompareFunction compare) {
     // Find largest among root,
     // left child and right child
 
@@ -777,7 +775,7 @@ void heapify(void *arr[], int n, int i, CompareFunction compare)
 
 void heapSort(void *arr[], size_t arrSize, CompareFunction compareFunction) {
     // build max heap
-    for (int i = (arrSize / 2) - 1; i >= 0; i-- ) {
+    for (int i = (arrSize / 2) - 1; i >= 0; i--) {
         heapify(arr, arrSize, i, compareFunction);
     }
 
@@ -795,36 +793,90 @@ void heapSort(void *arr[], size_t arrSize, CompareFunction compareFunction) {
 }
 
 
-
 #endif //HEAP_SORT_H
+
+//
+// Created by tu on 04/12/2023.
+//
+#ifndef INYEAR4_1_BINARY_SEARCH_H
+#define INYEAR4_1_BINARY_SEARCH_H
+
+/**
+ * Find the target index in the array
+ * @param arr the array
+ * @param n length of array
+ * @param target pointer to target
+ * @param compare how to compare each elemnt in array with target
+ * @return index of target in array <br> an int that less than 0 if cant find target in array
+ */
+int binarySearch(void *arr[], int n, void *target, CompareFunction compare);
+
+int _binarySearch(void* arr[], int leftI, int rightI, void *target, CompareFunction compare) {
+    while (leftI <= rightI) {
+        int current = leftI + (rightI - leftI) / 2;
+        if (compare(arr[current], target) == 0)
+            return current;
+
+        if (compare(arr[current], target) < 0)
+            leftI = current + 1;
+        else
+            rightI = current - 1;
+    }
+    return -1;
+}
+
+
+int binarySearch(void **arr, int n, void *target, CompareFunction compare) {
+    return _binarySearch(arr, 0, n - 1, target, compare);
+}
+
+
+
+#endif //INYEAR4_1_BINARY_SEARCH_H
+
 #pragma endregion
 
 
 #include <stdio.h>
-
-int cmp(void *v1, void *v2) {
-    int i1 = *((int*) v1);
-    int i2 = *((int*) v2);
+int qsort_cmp(const void *v1, const void *v2) {
+    int i1 = *void2(int*, v1);
+    int i2 = *void2(int*, v2);
 
     return i1 - i2;
 }
 
+/**
+ * Given a sequence of distinct elements a1, a2, …, aN and a value b. Count the number Q of pairs (ai, aj) having ai + aj = b (i < j).InputLine 1: contains an integer n and b (1 <= n <= 106, 1 <= b <= 109)Line 2: contains a1, a2, …, aN (1 <= ai <= 106)OutputWrite the value of Q
+ */
 int main() {
-    int n;
-    scanf("%d", &n);
+    int n, b;
+    scanf("%d %d", &n, &b);
 
-    void **arr = (void*) malloc(n * sizeof(void*));
+    int **arr = (int**) malloc(n * sizeof(int*));
+    int *intArr = (int*) malloc(n * sizeof(int));
 
-    int x;
-    for (int i = 0; i < n; ++i) {
-        scanf("%d", &x);
+    int tmp;
+    for (int i = 0; i < n; i ++) {
+        arr[i] = intArr + i;
 
-        arr[i] = copy2heap(&x,sizeof(int));
+        scanf("%d", arr[i]);
+
     }
 
-    heapSort(arr,n,cmp);
+    qsort(arr, n, sizeof(int*), qsort_cmp);
 
-    for (int i = 0; i < n; ++i) {
-        printf("%d ", void2(int, arr[i]));
+//    for (int i = 0; i < n; i++) {
+//        printf("%d ", void2(int, arr[i]));
+//    }
+
+    int q = 0;
+    for (int i = 0; i < n - 1; i ++) {
+        int target = b - *arr[i];
+
+        int res = binarySearch((void **) (arr + i + 1), n - i - 1, &target, intCmp);
+
+        if (res >= 0) q ++;
     }
+
+    printf("%d", q);
 }
