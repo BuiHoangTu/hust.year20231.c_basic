@@ -22,12 +22,14 @@ int main() {
     scanf("%d %d", &n, &b);
 
     int **arr = (int**) malloc(n * sizeof(int*));
+    int *intArr = (int*) malloc(n * sizeof(int));
 
     int tmp;
     for (int i = 0; i < n; i ++) {
-        scanf("%d", &tmp);
+        arr[i] = intArr + i;
 
-        arr[i] = copy2heap(&tmp, sizeof(int));
+        scanf("%d", arr[i]);
+
     }
 
     qsort(arr, n, sizeof(int*), qsort_cmp);
