@@ -7,147 +7,39 @@
 
 #include "tree_define.h"
 #include "core/type.h"
-#include "core/heap.h"
 
-void bn_addLeftNode(TreeNode *root, void *nodeId, void *newNodeData, CompareFunction func)
-{
-    if (!root)
-        return;
-    if (func(root->data, nodeId) == 0)
-    {
-        if (root->left)
-            return;
-        else
-        {
-            quickCalloc(TreeNode, node);
-            node->data = newNodeData;
-            root->left = node;
-        }
-    }
-    else
-    {
-        bn_addLeftNode(root->left, nodeId, newNodeData, func);
-        bn_addLeftNode(root->right, nodeId, newNodeData, func);
-    }
-}
+/// <summary>
+/// Make a node with data
+/// </summary>
+/// <param name="data">Content of the node, maybe id</param>
+/// <returns>tree node with the data</returns>
+TreeNode *bTreeMakeNode(void *data);
 
-void bn_addRightNode(TreeNode *root, void *nodeId, void *newNodeData, CompareFunction func)
-{
-    if (!root)
-        return;
-    if (func(root->data, nodeId) == 0)
-    {
-        if (root->right)
-            return;
-        else
-        {
-            quickCalloc(TreeNode, node);
-            node->data = newNodeData;
-            root->right = node;
-        }
-    }
-    else
-    {
-        bn_addRightNode(root->left, nodeId, newNodeData, func);
-        bn_addRightNode(root->right, nodeId, newNodeData, func);
-    }
-}
+/// <summary>
+/// Make a tree for easier tree contain than keeping root
+/// </summary>
+/// <param name="root">TreeNode representing root of the tree</param>
+/// <returns>Tree</returns>
+Tree *makeBTree(TreeNode *root);
 
-TreeNode *bn_findNode(TreeNode *root, void *data, CompareFunction func)
-{
-    if (!root)
-        return NULL;
-    if (func(root->data, data) == 0)
-        return root;
+/// <summary>
+/// Find the first node with that has data match with data by func.
+/// </summary>
+/// <param name="data">sample data</param>
+/// <param name="tree">the tree that need to search from</param>
+/// <param name="func">how to compare 2 void pointer compare treenode date with sample data</param>
+/// <returns>One node that match, NULL if none match</returns>
+TreeNode *bTreeFindNode(void *data, Tree *tree, CompareFunction func);
 
-    TreeNode *res = bn_findNode(root->left, data, func);
-    if (res)
-        return res;
-    else
-        return bn_findNode(root->right, data, func);
-}
+void bTreePreOrder(Tree *t, Consume1 action);
 
-long bn_countNode(TreeNode *root)
-{
-    if (!root)
-        return 0;
+void bTreeInOrder(Tree *t, Consume1 action);
 
-    long childCount = 0;
-    childCount += bn_countNode(root->left) + bn_countNode(root->right);
+void bTreePostOrder(Tree *t, Consume1 action);
 
-    return childCount + 1;
-}
+long bTreeHeight(Tree *tree);
 
-#define bn_traverse_lrn(cur, tree)                       \
-    for (TreeNode *cur = bn_first_postorder(tree->root); \
-         cur != NULL; cur = bn_next_postorder(cur))
-
-#define bn_traverse_lnr(cur, tree)                 \
-    for (TreeNode *cur = bn_left_most(tree->root); \
-         cur != NULL; cur = bn_next_inorder(cur))
-
-#define bn_traverse_rnl(cur, tree)                  \
-    for (TreeNode *cur = bn_right_most(tree->root); \
-         cur != NULL; cur = bn_prev_inorder(cur))
-
-#define bn_MOST(x, child, out)       \
-    (out) = (x);                     \
-    do                               \
-    {                                \
-        while ((out)->child != NULL) \
-        {                            \
-            (out) = (out)->child;    \
-        }                            \
-    } while (0)
-
-#define BS_NEAREST(x, left, right, out)                  \
-    do                                                   \
-    {                                                    \
-        if ((x)->right != NULL)                          \
-        {                                                \
-            (out) = bn_##left##_most((x)->right);        \
-        }                                                \
-        else                                             \
-        {                                                \
-            (out) = (x)->top;                            \
-            while ((out) != NULL && (x) == (out)->right) \
-            {                                            \
-                (x) = (out);                             \
-                (out) = (out)->top;                      \
-            }                                            \
-        }                                                \
-    } while (0)
-
-TreeNode *bn_right_most(TreeNode *x)
-{
-    if (!x)
-    {
-        return NULL;
-    }
-    TreeNode *y;
-    bn_MOST(x, right, y);
-    return y;
-}
-
-int compareInt(void *v1, void *v2)
-{
-    int i1 = *((int *)v1);
-    int i2 = *((int *)v2);
-    return i2 - i1;
-}
-
-TreeNode *bn_prev_inorder(TreeNode *x)
-{
-    if (!x)
-    {
-        return NULL;
-    }
-    TreeNode *y;
-    BS_NEAREST(x, right, left, y);
-    return y;
-}
-
-#include <stdio.h>
+long bTreeNodeDepth(Tree *tree, void *data, CompareFunction compareFunction);
 
 
 #endif // BINARY_TREE_H_

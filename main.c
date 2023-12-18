@@ -834,49 +834,243 @@ int binarySearch(void **arr, int n, void *target, CompareFunction compare) {
 
 #endif //INYEAR4_1_BINARY_SEARCH_H
 
+#ifndef BINARY_TREE_H_
+#define BINARY_TREE_H_
+
+// <summary>
+/// Make a node with data
+/// </summary>
+/// <param name="data">Content of the node, maybe id</param>
+/// <returns>tree node with the data</returns>
+TreeNode *bTreeMakeNode(void *data);
+
+/// <summary>
+/// Make a tree for easier tree contain than keeping root
+/// </summary>
+/// <param name="root">TreeNode representing root of the tree</param>
+/// <returns>Tree</returns>
+Tree *makeBTree(TreeNode *root);
+
+/// <summary>
+/// Find the first node with that has data match with data by func.
+/// </summary>
+/// <param name="data">sample data</param>
+/// <param name="tree">the tree that need to search from</param>
+/// <param name="func">how to compare 2 void pointer compare treenode date with sample data</param>
+/// <returns>One node that match, NULL if none match</returns>
+TreeNode *bTreeFindNode(void *data, Tree *tree, CompareFunction func);
+
+void bTreePreOrder(Tree *t, Consume1 action);
+
+void bTreeInOrder(Tree *t, Consume1 action);
+
+void bTreePostOrder(Tree *t, Consume1 action);
+
+long bTreeHeight(Tree *tree);
+
+long bTreeNodeDepth(Tree *tree, void *data, CompareFunction compareFunction);
+
+TreeNode *bTreeMakeNode(void *data) {
+    quickCalloc(TreeNode, newNode);
+    newNode->data = data;
+    return newNode;
+}
+
+Tree *makeBTree(TreeNode *root) {
+    quickCalloc(Tree, tree);
+    tree->root = root;
+    return tree;
+}
+
+TreeNode *_bTreeFindNode(void *data, TreeNode *root, CompareFunction compareFunction) {
+    if (root == NULL) {
+        return NULL;
+    }
+
+    if (compareFunction(data, root->data) == 0) return root;
+
+    TreeNode *left = _bTreeFindNode(data, root->left, compareFunction);
+    if (left) return left;
+
+    TreeNode *right = _bTreeFindNode(data, root->right, compareFunction);
+    return right;
+}
+
+
+TreeNode *bTreeFindNode(void *data, Tree *tree, CompareFunction compareFunction) {
+    if (tree == NULL || compareFunction == NULL) {
+        return NULL;
+    }
+
+    return _bTreeFindNode(data, tree->root, compareFunction);
+}
+
+void bNodePreOrder(TreeNode *node, Consume1 action) {
+    if (node != NULL) {
+        action(node->data);
+        bNodePreOrder(node->left, action);
+        bNodePreOrder(node->right, action);
+    }
+}
+
+void bTreePreOrder(Tree *t, Consume1 action) {
+    if (t) {
+        bNodePreOrder(t->root, action);
+    }
+}
+
+// Function to perform in-order traversal on the tree
+void bNodeInOrder(TreeNode *node, void (*action)(void *)) {
+    if (node != NULL) {
+        bNodeInOrder(node->left, action);
+        action(node->data);
+        bNodeInOrder(node->right, action);
+    }
+}
+
+void bTreeInOrder(Tree *t, Consume1 action) {
+    if (t) {
+        bNodeInOrder(t->root, action);
+    }
+}
+
+
+// Function to perform post-order traversal on the tree
+void bNodePostOrder(TreeNode *node, void (*action)(void *)) {
+    if (node != NULL) {
+        bNodePostOrder(node->left, action);
+        bNodePostOrder(node->right, action);
+        action(node->data);
+    }
+}
+
+void bTreePostOrder(Tree *t, Consume1 action) {
+    if (t) {
+        bNodePostOrder(t->root, action);
+    }
+}
+#endif // BINARY_TREE_H_
 #pragma endregion
 
 
 #include <stdio.h>
-int qsort_cmp(const void *v1, const void *v2) {
-    int i1 = *void2(int*, v1);
-    int i2 = *void2(int*, v2);
+Tree *tree;
 
-    return i1 - i2;
+void makeRoot(char *command) {
+    int id;
+    sscanf(command + 8, "%d", &id);
+
+    TreeNode *root = bTreeMakeNode(copy2heap(&id, sizeof(int)));
+    tree = makeBTree(root);
 }
 
-/**
- * Given a sequence of distinct elements a1, a2, …, aN and a value b. Count the number Q of pairs (ai, aj) having ai + aj = b (i < j).InputLine 1: contains an integer n and b (1 <= n <= 106, 1 <= b <= 109)Line 2: contains a1, a2, …, aN (1 <= ai <= 106)OutputWrite the value of Q
- */
-int main() {
-    int n, b;
-    scanf("%d %d", &n, &b);
+void addLeftChild(char *command) {
+    int parentId, curId;
+    sscanf(command + 12, "%d %d", &parentId, &curId);
 
-    int **arr = (int**) malloc(n * sizeof(int*));
-    int *intArr = (int*) malloc(n * sizeof(int));
+    // find the parent
+    TreeNode *parent = bTreeFindNode(&parentId, tree, intCmp);
+    if (!parent)
+        return;
 
-    int tmp;
-    for (int i = 0; i < n; i ++) {
-        arr[i] = intArr + i;
+    if (parent->left) return;
+    TreeNode *nnode = bTreeMakeNode(copy2heap(&curId, sizeof(int)));
+    parent->left =  nnode;
+}
 
-        scanf("%d", arr[i]);
+void addRightChild(char *command) {
+    int parentId, curId;
+    sscanf(command + 13, "%d %d", &parentId, &curId);
 
+    // find the parent
+    TreeNode *parent = bTreeFindNode(&parentId, tree, intCmp);
+    if (!parent)
+        return;
+    if (parent->right) return;
+    TreeNode *nnode = bTreeMakeNode(copy2heap(&curId, sizeof(int)));
+    parent->right = nnode;
+}
+
+void printNodeData(void *data) {
+    printf("%d ", void2(int, data));
+}
+
+void inOrder() {
+    bTreeInOrder(tree, printNodeData);
+}
+
+void preOrder() {
+    bTreePreOrder(tree, printNodeData);
+}
+
+void postOrder() {
+    bTreePostOrder(tree, printNodeData);
+}
+
+int countNodesWith2Children(TreeNode *node) {
+    if (node == NULL) return 0;
+
+    int cl = countNodesWith2Children(node->left);
+    int cr = countNodesWith2Children(node->right);
+
+    int total = cl + cr;
+
+    if (node->left != NULL && node->right != NULL) {
+        total++;
     }
 
-    qsort(arr, n, sizeof(int*), qsort_cmp);
+    return total;
+}
 
-//    for (int i = 0; i < n; i++) {
-//        printf("%d ", void2(int, arr[i]));
-//    }
+int isRootMaxHeap(TreeNode *node) {
+    if (!node)
+        return 1;
 
-    int q = 0;
-    for (int i = 0; i < n - 1; i ++) {
-        int target = b - *arr[i];
-
-        int res = binarySearch((void **) (arr + i + 1), n - i - 1, &target, intCmp);
-
-        if (res >= 0) q ++;
+    if ((node->left != NULL && intCmp(node->data, node->left->data) < 0) ||
+        (node->right != NULL && intCmp(node->data, node->right->data) < 0)) {
+        return 0;
     }
 
-    printf("%d", q);
+    return isRootMaxHeap(node->left) && isRootMaxHeap(node->right);
+}
+
+int isMaxHeap(char *command) {
+    int parentId;
+    sscanf(command + 9, "%d", &parentId);
+
+    // find the parent
+    TreeNode *node = bTreeFindNode(&parentId, tree, intCmp);
+    return isRootMaxHeap(node);
+}
+
+int main(int argc, const char *argv[]) {
+    char *line = (char *) malloc(1024);
+
+    while (1) {
+        fgets(line, 1024, stdin);
+        if (strncmp("Quit", line, 4) == 0)
+            break;
+        if (strncmp("CountNodes2Children", line, 6) == 0) {
+            int res = countNodesWith2Children(tree->root);
+            printf("%d", res);
+        }
+        if (strncmp("InOrder", line, 7) == 0)
+            inOrder();
+        if (strncmp("PreOrder", line, 8) == 0)
+            preOrder();
+        if (strncmp("PostOrder", line, 9) == 0)
+            postOrder();
+        if (strncmp("MakeRoot", line, 8) == 0)
+            makeRoot(line);
+        if (strncmp("AddLeftChild", line, 10) == 0)
+            addLeftChild(line);
+        if (strncmp("AddRightChild", line, 5) == 0)
+            addRightChild(line);
+        if (strncmp("IsMaxHeap", line, 9) == 0) {
+            int res = isMaxHeap(line);
+            printf("%d\n", res);
+        }
+    }
+
+    return 0;
 }

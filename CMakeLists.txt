@@ -13,5 +13,7 @@ add_subdirectory(contest8)
 add_subdirectory(contest9)
 add_subdirectory(contest10)
 
+add_subdirectory(test2)
+
 
 add_executable(prog main.c)
