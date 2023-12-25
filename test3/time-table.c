@@ -43,10 +43,7 @@ int main() {
     // Initialize an array to track teacher availability
     int **teacherAvailability = (int**)malloc((T + 1) * sizeof(int*));
     for (int i = 1; i <= T; ++i) {
-        teacherAvailability[i] = (int*)malloc((S + 1) * sizeof(int));
-        for (int j = 1; j <= S; ++j) {
-            teacherAvailability[i][j] = 0;
-        }
+        teacherAvailability[i] = (int*)calloc((S + 1), sizeof(int));
     }
 
     // Mark slots where teachers are busy
