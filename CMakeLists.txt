@@ -12,6 +12,8 @@ add_subdirectory(contest7)
 add_subdirectory(contest8)
 add_subdirectory(contest9)
 add_subdirectory(contest10)
+add_subdirectory(contest12)
+
 
 add_subdirectory(test2)
 
