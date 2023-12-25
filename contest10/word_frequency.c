@@ -17,12 +17,12 @@ int strCom(char** str1, char** str2) {
 }
 
 int main() {
-    char *line = (char*)malloc(1024);
+    char *line = (char*)malloc(25);
     HashMap *map = createHashmap((HashFunction) hashStr, (CompareFunction) strcmp);
     FILE *source = fopen("test_source.txt", "r");
 
     if (source == NULL) {
-        getcwd(line, 1023);
+        getcwd(line, 25);
         printf(line);
         exit(1);
     }
@@ -32,6 +32,7 @@ int main() {
     // read until eof
     int n = 0;
     char c = ' ';
+    int x = 0;
     while (1) {
         c = fgetc(source);
 
@@ -44,9 +45,11 @@ int main() {
                 // try to get from map
                 void *countVal = hashmapGet(map, line);
 
+                printf("%d", x++);
+
                 // if not exist, put to map
                 if (countVal == NULL) {
-                    char *word = strdup(line);
+                    char *word = strndup(line, n + 5);
                     int count = 1;
 
                     hashmapPut(map, word, copy2heap(&count, sizeof(int)));
