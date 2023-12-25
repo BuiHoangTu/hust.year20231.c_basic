@@ -16,6 +16,7 @@ add_subdirectory(contest12)
 
 
 add_subdirectory(test2)
+add_subdirectory(test3)
 
 
 add_executable(prog main.c)
