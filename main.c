@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 
 #pragma region heap.h
@@ -1252,34 +1253,57 @@ int strCom(char** str1, char** str2) {
 }
 
 int main() {
+    char *line = (char*)malloc(25);
     HashMap *map = createHashmap((HashFunction) hashStr, (CompareFunction) strcmp);
+    FILE *source = stdin;
 
-    char *line = (char*)malloc(1024);
-    char *successfully = fgets(line, 1024, stdin);
-    while (successfully) {
-        char* word = strtok(line, " ");
-        while (word){
-            void *value = hashmapGet(map, word);
+    if (source == NULL) {
+        getcwd(line, 25);
+        printf(line);
+        exit(1);
+    }
 
-            if (value) {
-                int *intValue = (int *) value;
-                *intValue += 1;
-            } else {
-                int intValue = 1;
-                hashmapPut(map, strdup(word), copy2heap(&intValue, sizeof(int)));
+
+
+    // read until eof
+    int n = 0;
+    char c = ' ';
+    while (1) {
+        c = fgetc(source);
+
+        // if not char, treat as \0
+        if (c == '\n' || c == ' ' || c == '\r' || c == EOF) {
+            // if not in word yet, skip
+            if (n > 0) {
+                line[n++] = '\0';
+
+                // try to get from map
+                void *countVal = hashmapGet(map, line);
+
+                // if not exist, put to map
+                if (countVal == NULL) {
+                    char *word = strdup(line);
+                    int count = 1;
+
+                    hashmapPut(map, word, copy2heap(&count, sizeof(int)));
+                } else {
+                    // increase count in map
+                    (*(int *) countVal) += 1;
+                }
             }
 
-            word = strtok(NULL, " ");
-        }
+            // start over new word
+            n = 0;
+        } else line[n++] = c;
 
-
-        successfully = fgets(line, 1024, stdin);
+        if (c == EOF) break;
     }
 
     ArrayList *list = keySet(map);
     qsort(list->content, list->length, sizeof(void*), (__compar_fn_t) strCom);
 
     for (int i = 0; i < list->length; i ++) {
-        printf("%s %d", (char*) list->content[i], void2(int, hashmapGet(map, list->content[i])));
+        printf("%s %d\n", (char*) list->content[i], void2(int, hashmapGet(map, list->content[i])));
     }
 }
+
