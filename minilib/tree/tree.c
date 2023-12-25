@@ -224,12 +224,12 @@ long _treeNodeDepth(TreeNode *node, long current, void *data, CompareFunction co
         return current;
     } else {
         // find in right
-        long right = _treeNodeDepth(data, current + 1, node->right, compare);
+        long right = _treeNodeDepth(node->right, current + 1, data, compare);
         if (right != -1)
             return right;
             // if nothing in right, try in deeper lv
         else
-            return _treeNodeDepth(data, current + 1, node->left, compare);
+            return _treeNodeDepth(node->left, current + 1, data, compare);
     }
 }
 
