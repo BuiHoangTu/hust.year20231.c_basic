@@ -54,7 +54,7 @@ int docCmp (void *d1, void* d2) {
 int main() {
     char *line = (char*) malloc(1024);
 
-    SingleLinkedList *list = sll_create();
+    SingleLinkedList *list = CreateSll();
 
     while (1) {
         fgets(line, 1024, stdin);
@@ -73,7 +73,7 @@ int main() {
 //        document->dd = dd;
         document->date = strdup(line);
 
-        sll_add_last(list, document);
+        sllAddLast(list, document);
     }
 
     free(line);

@@ -1,12 +1,12 @@
 #include "tree/binary_tree.h"
 
-TreeNode *bTreeMakeNode(void *data) {
+TreeNode *bTreeCreateNode(void *data) {
     quickCalloc(TreeNode, newNode);
     newNode->data = data;
     return newNode;
 }
 
-Tree *makeBTree(TreeNode *root) {
+Tree *createBTree(TreeNode *root) {
     quickCalloc(Tree, tree);
     tree->root = root;
     return tree;

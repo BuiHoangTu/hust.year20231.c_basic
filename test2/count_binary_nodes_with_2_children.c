@@ -12,8 +12,8 @@ void makeRoot(char *command) {
     int id;
     sscanf(command + 8, "%d", &id);
 
-    TreeNode *root = bTreeMakeNode(copy2heap(&id, sizeof(int)));
-    tree = makeBTree(root);
+    TreeNode *root = bTreeCreateNode(copy2heap(&id, sizeof(int)));
+    tree = createBTree(root);
 }
 
 void addLeftChild(char *command) {
@@ -31,7 +31,7 @@ void addLeftChild(char *command) {
         return;
 
     if (parent->left) return;
-    TreeNode *nnode = bTreeMakeNode(copy2heap(&curId, sizeof(int)));
+    TreeNode *nnode = bTreeCreateNode(copy2heap(&curId, sizeof(int)));
     parent->left =  nnode;
 }
 
@@ -49,7 +49,7 @@ void addRightChild(char *command) {
     if (!parent)
         return;
     if (parent->right) return;
-    TreeNode *nnode = bTreeMakeNode(copy2heap(&curId, sizeof(int)));
+    TreeNode *nnode = bTreeCreateNode(copy2heap(&curId, sizeof(int)));
     parent->right = nnode;
 }
 

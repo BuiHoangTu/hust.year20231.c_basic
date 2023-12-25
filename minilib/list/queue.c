@@ -1,22 +1,22 @@
 #include "list/queue.h"
 
 
-Queue* queue_create() {
-    return sll_create();
+Queue* createQueue() {
+    return CreateSll();
 }
 
 void enqueue(Queue* queue, void* value) {
-    sll_add_last(queue, value);
+    sllAddLast(queue, value);
 }
 
 void* dequeue(Queue* queue) {
-    return sll_remove(queue, 0);
+    return sllRemove(queue, 0);
 }
 
-void* queue_peek(Queue* queue) {
-    return sll_get(queue, 0);
+void* queuePeek(Queue* queue) {
+    return sllGet(queue, 0);
 }
 
-void queue_free(Queue* queue) {
-    sll_free(queue);
+void queueFree(Queue* queue) {
+    sllFree(queue);
 }

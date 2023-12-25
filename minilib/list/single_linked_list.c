@@ -1,6 +1,6 @@
 #include "single_linked_list.h"
 
-SingleLinkedList *sll_create()
+SingleLinkedList *CreateSll()
 {
 	SingleLinkedList *list = (SingleLinkedList *)malloc(sizeof(SingleLinkedList));
 	list->first = NULL;
@@ -119,25 +119,25 @@ SingleLinkedNode *sln_create(void *value)
 	return node;
 }
 
-void sll_add_last(SingleLinkedList *list, void *value)
+void sllAddLast(SingleLinkedList *list, void *value)
 {
 	SingleLinkedNode *newNode = sln_create(value);
 	__sll_add_node_last(list, newNode);
 }
 
-int sll_insert(SingleLinkedList *list, void *value, int index)
+int sllInsert(SingleLinkedList *list, void *value, int index)
 {
 	SingleLinkedNode *newNode = sln_create(value);
 	return __sll_insert_node(list, newNode, index);
 }
 
-void *sll_get(SingleLinkedList *list, int index)
+void *sllGet(SingleLinkedList *list, int index)
 {
 	SingleLinkedNode* node = __sll_get_node(list, index);
 	return node == NULL ? NULL : node->value;
 }
 
-void *sll_remove(SingleLinkedList *list, int index)
+void *sllRemove(SingleLinkedList *list, int index)
 {
 	if (index >= list->length)
 		return NULL;
@@ -164,7 +164,7 @@ int sll_next(SingleLinkedNode **node, void **obj)
     return 1;
 }
 
-void sll_free(SingleLinkedList *list)
+void sllFree(SingleLinkedList *list)
 {
 	free(list);
 }

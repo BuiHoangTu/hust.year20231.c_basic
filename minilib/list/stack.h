@@ -6,15 +6,15 @@
 
 #define Stack SingleLinkedList
 
-Stack* stack_create();
+Stack* createStack();
 
-void stack_push(Stack* stack, void* value);
+void stackPush(Stack* stack, void* value);
 
-void* stack_pop(Stack* stack);
+void* stackPop(Stack* stack);
 
-void* stack_peek(Stack* stack);
+void* stackPeek(Stack* stack);
 
-void stack_free(Stack* stack);
+void stackFree(Stack* stack);
 
 
 #endif // STACK_H_

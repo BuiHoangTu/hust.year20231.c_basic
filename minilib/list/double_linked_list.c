@@ -6,7 +6,7 @@
 #define toSLN(node) ((SingleLinkedNode *)node)
 #define toDLN(node) ((DoubleLinkedNode *)node)
 
-DoubleLinkedList *dll_create()
+DoubleLinkedList *CreateDll()
 {
     DoubleLinkedList *list = toDLL(malloc(sizeof(DoubleLinkedList)));
     toSLL(list)->first = NULL;
@@ -66,12 +66,12 @@ DoubleLinkedNode *dln_create(void *value)
     return node;
 }
 
-void dll_add_last(DoubleLinkedList *list, void *value)
+void DllAddLast(DoubleLinkedList *list, void *value)
 {
     __dll_add_node_last(list, dln_create(value));
 }
 
-int dll_insert(DoubleLinkedList *list, void *value, int index)
+int dllInsert(DoubleLinkedList *list, void *value, int index)
 {
     if (index > toSLL(list)->length)
         return 0;
@@ -88,12 +88,12 @@ int dll_insert(DoubleLinkedList *list, void *value, int index)
     return __dll_insert_node(list, newNode, index);
 }
 
-void *dll_get(DoubleLinkedList *list, int index)
+void *dllGet(DoubleLinkedList *list, int index)
 {
     return __sll_get_node(toSLL(list), index);
 }
 
-void *dll_remove(DoubleLinkedList *list, int index)
+void *dllRemove(DoubleLinkedList *list, int index)
 {
     if (index >= toSLL(list)->length)
         return NULL;
@@ -120,7 +120,7 @@ void *dll_remove(DoubleLinkedList *list, int index)
     return value;
 }
 
-int dll_prev(DoubleLinkedNode **node, void **obj)
+int dllPrev(DoubleLinkedNode **node, void **obj)
 {
     if ((*node) == NULL)
         return 0;
@@ -131,7 +131,7 @@ int dll_prev(DoubleLinkedNode **node, void **obj)
     return 1;
 }
 
-void dll_free(SingleLinkedList *list)
+void dllFree(SingleLinkedList *list)
 {
     free(list);
 }

@@ -19,8 +19,8 @@ int main() {
     int i;
 
     i = 10;
-    TreeNode *root = treeMakeNode(copy2heap(&i, sizeof(int)));
-    Tree *tree = treeMakeTree(root);
+    TreeNode *root = treeCreateNode(copy2heap(&i, sizeof(int)));
+    Tree *tree = createTree(root);
 
     i = 10;
     TreeNode *parent = treeFindNode(&i, tree, int_cmp);

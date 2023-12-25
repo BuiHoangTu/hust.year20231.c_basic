@@ -1,8 +1,8 @@
 #ifndef TREE_TYPE_H_
 #define TREE_TYPE_H_
 
-typedef struct treenode {
-    struct treenode *left, *right, *top;
+typedef struct tree_node {
+    struct tree_node *left, *right, *top;
     void *data;
 } TreeNode;
 

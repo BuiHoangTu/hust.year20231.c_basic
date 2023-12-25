@@ -15,21 +15,21 @@
 /// </summary>
 /// <param name="data">Content of the node, maybe id</param>
 /// <returns>tree node with the data</returns>
-TreeNode *treeMakeNode(void *data);
+TreeNode *treeCreateNode(void *data);
 
 /// <summary>
 /// Make a tree for easier tree contain than keeping root
 /// </summary>
 /// <param name="root">TreeNode representing root of the tree</param>
 /// <returns>Tree</returns>
-Tree *treeMakeTree(TreeNode *root);
+Tree *createTree(TreeNode *root);
 
 /// <summary>
 /// Find the first node with that has data match with data by func.
 /// </summary>
 /// <param name="data">sample data</param>
 /// <param name="tree">the tree that need to search from</param>
-/// <param name="func">how to compare 2 void pointer compare treenode date with sample data</param>
+/// <param name="func">how to compare 2 void pointer compare tree_node date with sample data</param>
 /// <returns>One node that match, NULL if none match</returns>
 TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func);
 

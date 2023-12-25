@@ -15,15 +15,15 @@ typedef struct dll
 	struct sll base;
 } DoubleLinkedList;
 
-DoubleLinkedList* dll_create();
+DoubleLinkedList* CreateDll();
 
-void dll_add_last(DoubleLinkedList* list, void* value);
+void DllAddLast(DoubleLinkedList* list, void* value);
 
-int dll_insert(DoubleLinkedList* list, void* value, int index);
+int dllInsert(DoubleLinkedList* list, void* value, int index);
 
-void* dll_get(DoubleLinkedList* list, int index);
+void* dllGet(DoubleLinkedList* list, int index);
 
-void* dll_remove(DoubleLinkedList* list, int index);
+void* dllRemove(DoubleLinkedList* list, int index);
 
 /**
  * Move node to next node and obj to the value of the next node
@@ -32,7 +32,7 @@ void* dll_remove(DoubleLinkedList* list, int index);
  * @return 1: if the operation success
  *         0: if node is already the last node
 */
-int dll_next(DoubleLinkedNode** node, void** obj) {
+int dllNext(DoubleLinkedNode** node, void** obj) {
 	return sll_next((SingleLinkedNode**)node, obj);
 }
 
@@ -43,14 +43,14 @@ int dll_next(DoubleLinkedNode** node, void** obj) {
  * @return 1: if the operation success
  *         0: if node is already the first node
 */
-int dll_prev(DoubleLinkedNode** node, void** obj);
+int dllPrev(DoubleLinkedNode** node, void** obj);
 
 #define dll_foreach(obj, list)             \
 	SingleLinkedNode *_node = ((SingleLinkedList* )list)->first; \
 	void *obj;                             \
 	while (sll_next(&_node, &obj))
 
-void dll_free(SingleLinkedList* list);
+void dllFree(SingleLinkedList* list);
 
 
 #endif // !DLL_H_

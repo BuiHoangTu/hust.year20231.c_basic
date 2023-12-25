@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include "stdlib.h"
+
 #pragma region minilib-combined
 #ifndef HEAP_H_
 #define HEAP_H_
@@ -30,6 +33,8 @@ typedef int (*CompareFunction)(void *, void *);
 typedef void (*Action)();
 
 typedef void (*Consume1)(void *);
+
+typedef int (*HashFunction)(void *);
 
 /**
  *
@@ -64,28 +69,28 @@ typedef struct sll {
 /**
  * Create a SingleLinkedList
 */
-SingleLinkedList *sll_create();
+SingleLinkedList *CreateSll();
 
 /**
  * Add an object to the last part of the list 
 */
-void sll_add_last(SingleLinkedList *list, void *value);
+void sllAddLast(SingleLinkedList *list, void *value);
 
 /**
  * Add an object at the index 
  * @return 1: success; 0: index out of bound
 */
-int sll_insert(SingleLinkedList *list, void *value, int index);
+int sllInsert(SingleLinkedList *list, void *value, int index);
 
 /**
  * Get an object at the index
 */
-void *sll_get(SingleLinkedList *list, int index);
+void *sllGet(SingleLinkedList *list, int index);
 
 /**
  * Remove an object at index, return that object 
 */
-void *sll_remove(SingleLinkedList *list, int index);
+void *sllRemove(SingleLinkedList *list, int index);
 
 /**
  * Move node to next node and obj to the value of the next node
@@ -101,10 +106,10 @@ int sll_next(SingleLinkedNode **node, void **obj);
     void *obj;                             \
     while (sll_next(&_node, &obj))
 
-void sll_free(SingleLinkedList *list);
+void sllFree(SingleLinkedList *list);
 
 
-SingleLinkedList *sll_create() {
+SingleLinkedList *CreateSll() {
     SingleLinkedList *list = (SingleLinkedList *) malloc(sizeof(SingleLinkedList));
     list->first = NULL;
     list->last = NULL;
@@ -207,22 +212,22 @@ SingleLinkedNode *sln_create(void *value) {
     return node;
 }
 
-void sll_add_last(SingleLinkedList *list, void *value) {
+void sllAddLast(SingleLinkedList *list, void *value) {
     SingleLinkedNode *newNode = sln_create(value);
     __sll_add_node_last(list, newNode);
 }
 
-int sll_insert(SingleLinkedList *list, void *value, int index) {
+int sllInsert(SingleLinkedList *list, void *value, int index) {
     SingleLinkedNode *newNode = sln_create(value);
     return __sll_insert_node(list, newNode, index);
 }
 
-void *sll_get(SingleLinkedList *list, int index) {
+void *sllGet(SingleLinkedList *list, int index) {
     SingleLinkedNode *node = __sll_get_node(list, index);
     return node == NULL ? NULL : node->value;
 }
 
-void *sll_remove(SingleLinkedList *list, int index) {
+void *sllRemove(SingleLinkedList *list, int index) {
     if (index >= list->length)
         return NULL;
 
@@ -246,7 +251,7 @@ int sll_next(SingleLinkedNode **node, void **obj) {
     return 1;
 }
 
-void sll_free(SingleLinkedList *list) {
+void sllFree(SingleLinkedList *list) {
     free(list);
 }
 
@@ -258,72 +263,204 @@ void sll_free(SingleLinkedList *list) {
 
 #define Queue SingleLinkedList
 
-Queue *queue_create();
+Queue *createQueue();
 
 void enqueue(Queue *queue, void *value);
 
 void *dequeue(Queue *queue);
 
-void *queue_peek(Queue *queue);
+void *queuePeek(Queue *queue);
 
-void queue_free(Queue *queue);
+void queueFree(Queue *queue);
 
 
-Queue *queue_create() {
-    return sll_create();
+Queue *createQueue() {
+    return CreateSll();
 }
 
 void enqueue(Queue *queue, void *value) {
-    sll_add_last(queue, value);
+    sllAddLast(queue, value);
 }
 
 void *dequeue(Queue *queue) {
-    return sll_remove(queue, 0);
+    return sllRemove(queue, 0);
 }
 
-void *queue_peek(Queue *queue) {
-    return sll_get(queue, 0);
+void *queuePeek(Queue *queue) {
+    return sllGet(queue, 0);
 }
 
-void queue_free(Queue *queue) {
-    sll_free(queue);
+void queueFree(Queue *queue) {
+    sllFree(queue);
 }
 
 #endif // QUEUE_H_
+
+//
+// Created by bhtuw on 19/11/2023.
+//
+
+#ifndef MINI_LIBRARY_ARRAY_LIST_H
+#define MINI_LIBRARY_ARRAY_LIST_H
+
+typedef struct
+{
+    int length;
+    int capacity;
+    void **content;
+} ArrayList;
+
+
+ArrayList *arraylist_create();
+
+
+/**
+ * Add an object to a list
+ */
+void arraylist_add_last(ArrayList *list, void *object);
+
+/**
+ * Insert an object to the specified position
+ */
+void arraylist_insert(ArrayList *list, int index, void *obj);
+
+/**
+ * Get object at index
+ */
+void *arraylist_get(ArrayList *list, int index);
+
+/**
+ * Remove and return element so user can free it if needed
+ */
+void *arraylist_remove(ArrayList *list, int index);
+
+void _arraylist_next(ArrayList *list, int *index, void **obj);
+
+/**
+ * foreach object in the list, you do thing
+ */
+#define arraylist_foreach(obj, list) \
+    int _i = 0;            \
+    for (void *obj = list->content[0]; _i < list->length; _arraylist_next(list, &_i, &obj))
+
+void arraylist_free(ArrayList *list);
+
+#define MIN_CAPACITY 10
+#define ALLOCATE_THRESHOLD (100 / 100)
+#define ALLOCATE_RATIO 2
+
+void _arr_enlarge(ArrayList *list)
+{
+    if (list->length >= list->capacity * ALLOCATE_THRESHOLD)
+    {
+        list->capacity *= ALLOCATE_RATIO;
+        list->content = realloc(list->content, list->capacity * sizeof(void *));
+    }
+}
+
+ArrayList *arraylist_create()
+{
+    /* Allocate Memory */
+    ArrayList *list = malloc(sizeof(ArrayList));
+    if (list == NULL)
+        return NULL;
+
+    // initialize fields
+    list->capacity = MIN_CAPACITY;
+    list->length = 0;
+    list->content = calloc(MIN_CAPACITY, sizeof(void *)); // content = array of pointer
+    return list;
+}
+
+void _arraylist_next(ArrayList *list, int *index, void **obj)
+{
+    (*index)++;
+    *obj = list->content[*index];
+}
+
+void arraylist_add_last(ArrayList *list, void *elem)
+{
+    // need bigger size
+    _arr_enlarge(list);
+
+    /* Adds one element of generic pointer type to the internal array */
+    list->content[list->length] = elem;
+    list->length += 1;
+}
+
+void arraylist_insert(ArrayList *list, int index, void *obj)
+{
+    // bigger size
+    _arr_enlarge(list);
+
+    memcpy(list->content + index + 1, list->content + index, list->length - index);
+    list->content[index] = obj;
+    list->length++;
+}
+
+void *arraylist_get(ArrayList *list, int index)
+{
+    /* Gets an member of the array at an index */
+    return list->content[index];
+}
+
+void *arraylist_remove(ArrayList *list, int index)
+{
+    /* Removes one element at and index */
+    if (index > list->length - 1)
+        return NULL;
+
+    void *del_elem = list->content[index];
+    list->length--;
+    // move all back elem forward
+    memcpy(list->content + index, list->content + index + 1, list->length - index);
+    return del_elem;
+}
+
+void arraylist_free(ArrayList *list)
+{
+    /* Clears the internal array */
+    free(list->content);
+    free(list);
+}
+
+
+#endif //MINI_LIBRARY_ARRAY_LIST_H
+
 
 #ifndef STACK_H_
 #define STACK_H_
 
 #define Stack SingleLinkedList
 
-Stack *stack_create();
+Stack *createStack();
 
-void stack_push(Stack *stack, void *value);
+void stackPush(Stack *stack, void *value);
 
-void *stack_pop(Stack *stack);
+void *stackPop(Stack *stack);
 
-void *stack_peek(Stack *stack);
+void *stackPeek(Stack *stack);
 
-void stack_free(Stack *stack);
+void stackFree(Stack *stack);
 
-Stack *stack_create() {
-    return sll_create();
+Stack *createStack() {
+    return CreateSll();
 }
 
-void stack_push(Stack *stack, void *value) {
-    sll_insert(stack, value, 0);
+void stackPush(Stack *stack, void *value) {
+    sllInsert(stack, value, 0);
 }
 
-void *stack_pop(Stack *stack) {
-    return sll_remove(stack, 0);
+void *stackPop(Stack *stack) {
+    return sllRemove(stack, 0);
 }
 
-void *stack_peek(Stack *stack) {
-    return sll_get(stack, 0);
+void *stackPeek(Stack *stack) {
+    return sllGet(stack, 0);
 }
 
-void stack_free(Stack *stack) {
-    sll_free(stack);
+void stackFree(Stack *stack) {
+    sllFree(stack);
 }
 
 
@@ -332,8 +469,8 @@ void stack_free(Stack *stack) {
 #ifndef TREE_TYPE_H_
 #define TREE_TYPE_H_
 
-typedef struct treenode {
-    struct treenode *left, *right, *top;
+typedef struct tree_node {
+    struct tree_node *left, *right, *top;
     void *data;
 } TreeNode;
 
@@ -357,21 +494,21 @@ typedef struct tree {
 /// </summary>
 /// <param name="data">Content of the node, maybe id</param>
 /// <returns>tree node with the data</returns>
-TreeNode *treeMakeNode(void *data);
+TreeNode *treeCreateNode(void *data);
 
 /// <summary>
 /// Make a tree for easier tree contain than keeping root
 /// </summary>
 /// <param name="root">TreeNode representing root of the tree</param>
 /// <returns>Tree</returns>
-Tree *treeMakeTree(TreeNode *root);
+Tree *createTree(TreeNode *root);
 
 /// <summary>
 /// Find the first node with that has data match with data by func.
 /// </summary>
 /// <param name="data">sample data</param>
 /// <param name="tree">the tree that need to search from</param>
-/// <param name="func">how to compare 2 void pointer compare treenode date with sample data</param>
+/// <param name="func">how to compare 2 void pointer compare tree_node date with sample data</param>
 /// <returns>One node that match, NULL if none match</returns>
 TreeNode *treeFindNode(void *data, Tree *tree, CompareFunction func);
 
@@ -389,13 +526,13 @@ void treeInOrder(Tree *t, Consume1 action);
 void treePostOrder(Tree *t, Consume1 action);
 
 
-TreeNode *treeMakeNode(void *data) {
+TreeNode *treeCreateNode(void *data) {
     quickCalloc(TreeNode, node);
     node->data = data;
     return node;
 }
 
-Tree *treeMakeTree(TreeNode *root) {
+Tree *createTree(TreeNode *root) {
     quickCalloc(Tree, tree);
     tree->root = root;
     return tree;
@@ -429,7 +566,7 @@ void treeAddLastChild(TreeNode *node, void *data) {
         return;
 
     // make new node
-    TreeNode *cur = treeMakeNode(data);
+    TreeNode *cur = treeCreateNode(data);
     // find child
     TreeNode *child = node->left;
     // if no child, just add
@@ -452,35 +589,35 @@ void treePreOrder(Tree *t, Consume1 action) {
     if (!root) return;
 
     // stack of node
-    Stack *stackOfTop = stack_create();
-    stack_push(stackOfTop, root);
+    Stack *stackOfTop = createStack();
+    stackPush(stackOfTop, root);
 
     // the data in preorder will be stored here
-    SingleLinkedList *dataInPreOrder = sll_create();
+    SingleLinkedList *dataInPreOrder = CreateSll();
 
     while (stackOfTop->length > 0) {
         // get node add to back of data list
-        TreeNode *node = (TreeNode *) stack_pop(stackOfTop);
-        sll_add_last(dataInPreOrder, node->data);
+        TreeNode *node = (TreeNode *) stackPop(stackOfTop);
+        sllAddLast(dataInPreOrder, node->data);
 
         // push all child in revert order
         TreeNode *child = node->left;
-        Stack *revertor = stack_create();
+        Stack *revertor = createStack();
         while (child) {
-            stack_push(revertor, child);
+            stackPush(revertor, child);
             // go to next sibling;
             child = child->right;
         }
-        while (revertor->length > 0) stack_push(stackOfTop, stack_pop(revertor));
-        stack_free(revertor);
+        while (revertor->length > 0) stackPush(stackOfTop, stackPop(revertor));
+        stackFree(revertor);
     }
 
     sll_foreach(data, dataInPreOrder) {
         action(data);
     }
 
-    sll_free(dataInPreOrder);
-    stack_free(stackOfTop);
+    sllFree(dataInPreOrder);
+    stackFree(stackOfTop);
 }
 
 void nodeInOrder(TreeNode *root, Consume1 action) {
@@ -531,15 +668,15 @@ TreeNode *getChild(TreeNode *parent, int index) {
 }
 
 void nodePostOrder(TreeNode *root, Consume1 action) {
-    Stack *nodeStack = stack_create();
-    Stack *indexStack = stack_create();
+    Stack *nodeStack = createStack();
+    Stack *indexStack = createStack();
     int rootIndex = 0;
-    SingleLinkedList *list = sll_create();
+    SingleLinkedList *list = CreateSll();
 
     while (root || nodeStack->length > 0) {
         if (root) {
-            stack_push(nodeStack, root);
-            stack_push(indexStack, copy2heap(&rootIndex, sizeof(int)));
+            stackPush(nodeStack, root);
+            stackPush(indexStack, copy2heap(&rootIndex, sizeof(int)));
             rootIndex = 0;
 
             // move to child
@@ -547,23 +684,23 @@ void nodePostOrder(TreeNode *root, Consume1 action) {
             continue; // continue until no more first child
         }
 
-        TreeNode *node = (TreeNode *) stack_pop(nodeStack);
-        int *nodeIndex = (int *) stack_pop(indexStack);
+        TreeNode *node = (TreeNode *) stackPop(nodeStack);
+        int *nodeIndex = (int *) stackPop(indexStack);
 
-        sll_add_last(list, node->data);
+        sllAddLast(list, node->data);
 
         // pop all children of a node
-        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode *) stack_peek(nodeStack)) - 1) {
-            node = (TreeNode *) stack_pop(nodeStack);
+        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode *) stackPeek(nodeStack)) - 1) {
+            node = (TreeNode *) stackPop(nodeStack);
             free(nodeIndex);
-            nodeIndex = (int *) stack_pop(indexStack);
+            nodeIndex = (int *) stackPop(indexStack);
 
-            sll_add_last(list, node->data);
+            sllAddLast(list, node->data);
         }
 
         // if there is another layer assign the root
         if (nodeStack->length > 0) {
-            root = getChild(((TreeNode *) stack_peek(nodeStack)), *nodeIndex + 1);
+            root = getChild(((TreeNode *) stackPeek(nodeStack)), *nodeIndex + 1);
             rootIndex = *nodeIndex + 1;
         }
         free(nodeIndex);
@@ -573,9 +710,9 @@ void nodePostOrder(TreeNode *root, Consume1 action) {
         action(o);
     }
 
-    stack_free(nodeStack);
-    stack_free(indexStack);
-    sll_free(list);
+    stackFree(nodeStack);
+    stackFree(indexStack);
+    sllFree(list);
 }
 
 void treePostOrder(Tree *t, Consume1 action) {
@@ -842,21 +979,21 @@ int binarySearch(void **arr, int n, void *target, CompareFunction compare) {
 /// </summary>
 /// <param name="data">Content of the node, maybe id</param>
 /// <returns>tree node with the data</returns>
-TreeNode *bTreeMakeNode(void *data);
+TreeNode *bTreeCreateNode(void *data);
 
 /// <summary>
 /// Make a tree for easier tree contain than keeping root
 /// </summary>
 /// <param name="root">TreeNode representing root of the tree</param>
 /// <returns>Tree</returns>
-Tree *makeBTree(TreeNode *root);
+Tree *createBTree(TreeNode *root);
 
 /// <summary>
 /// Find the first node with that has data match with data by func.
 /// </summary>
 /// <param name="data">sample data</param>
 /// <param name="tree">the tree that need to search from</param>
-/// <param name="func">how to compare 2 void pointer compare treenode date with sample data</param>
+/// <param name="func">how to compare 2 void pointer compare tree_node date with sample data</param>
 /// <returns>One node that match, NULL if none match</returns>
 TreeNode *bTreeFindNode(void *data, Tree *tree, CompareFunction func);
 
@@ -870,13 +1007,13 @@ long bTreeHeight(Tree *tree);
 
 long bTreeNodeDepth(Tree *tree, void *data, CompareFunction compareFunction);
 
-TreeNode *bTreeMakeNode(void *data) {
+TreeNode *bTreeCreateNode(void *data) {
     quickCalloc(TreeNode, newNode);
     newNode->data = data;
     return newNode;
 }
 
-Tree *makeBTree(TreeNode *root) {
+Tree *createBTree(TreeNode *root) {
     quickCalloc(Tree, tree);
     tree->root = root;
     return tree;
@@ -950,127 +1087,270 @@ void bTreePostOrder(Tree *t, Consume1 action) {
     }
 }
 #endif // BINARY_TREE_H_
+
+//
+// Created by tu on 12/11/23.
+//
+
+#ifndef INYEAR4_1_HASH_MAP_H
+#define INYEAR4_1_HASH_MAP_H
+
+/**
+ * @param size: how many elements are in the map <br>
+ * @param capacity: length of content <br>
+ * @param content: array of array_list <br>
+ * @param hashFunction: how to hash a key
+ * @param compareFunction: how to compare 2 key
+ */
+typedef struct hash_map {
+    ArrayList** content;
+    int size;
+    int capacity;
+    HashFunction hashFunction;
+    CompareFunction compareFunction;
+}HashMap;
+
+HashMap *createHashmap(HashFunction hashFunction, CompareFunction compareFunction);
+
+/**
+ * Insert value to map
+ * @param map
+ * @param key
+ * @param value new value
+ * @param compare compare 2 key
+ * @return old value if key existed <br>
+ * NULL if no existed key
+ */
+void *hashmapPut(HashMap *map, void *key, void *value);
+
+void *hashmapGet(HashMap *map, void *key);
+
+ArrayList *keySet(HashMap *map);
+
+void freeHashmap(HashMap* map, Consume1 freeKey, Consume1 freeValue);
+
+
+#define DEFAULT_MAP_SIZE 100
+#define MAP_SCALE 2
+
+typedef struct entry{
+    void *key;
+    void *value;
+    int hashCode;
+}Entry;
+
+void hashmapInitContent(HashMap *map) {
+    map->content = (ArrayList**) malloc(map->capacity * sizeof(ArrayList*));
+    for (int i = 0; i < map->capacity; i++) {
+        map->content[i] = arraylist_create();
+    }
+}
+
+void hashmapFreeContent(ArrayList **content, int length, Consume1 freeKey, Consume1 freeValue) {
+    for (int i = 0; i < length; ++i) {
+        ArrayList *bucket = content[i];
+        for (int j = 0; j < bucket->length; j++) {
+            Entry *entry = (Entry*)arraylist_get(bucket, j);
+            if (freeKey) freeKey(entry->key);
+            if (freeValue) freeValue(entry->value);
+            free(entry);
+        }
+        arraylist_free(bucket);
+    }
+
+    free(content);
+}
+
+void enlargeHashmap(HashMap *map) {
+    // get old length and map
+    int oldCapacity = map->capacity;
+    ArrayList **oldContent = map->content;
+
+    // enlarge content
+    map->capacity *= MAP_SCALE;
+    hashmapInitContent(map);
+
+    // move old content
+    for (int i = 0; i < oldCapacity; i++) {
+        ArrayList *oldBucket = oldContent[i];
+        for (int j = 0; j < oldBucket->length; i++) {
+            Entry *entry = (Entry*) oldBucket->content[j];
+            unsigned int newIndex = entry->hashCode % map->capacity;
+            arraylist_add_last(map->content[newIndex], entry);
+        }
+    }
+
+    // free old content
+    hashmapFreeContent(oldContent, oldCapacity, NULL, NULL);
+}
+
+HashMap *createHashmap(HashFunction hashFunction, CompareFunction compareFunction) {
+    HashMap *map = (HashMap*)malloc(sizeof(HashMap));
+
+    map->capacity = DEFAULT_MAP_SIZE;
+
+    hashmapInitContent(map);
+
+    map->compareFunction = compareFunction;
+    map->hashFunction = hashFunction;
+    map->size = 0;
+
+    return map;
+}
+
+void *hashmapPut(HashMap *map, void *key, void *value) {
+    if (map->size >= map->capacity) {
+        enlargeHashmap(map);
+    }
+
+    int hashCode = map->hashFunction(key);
+    unsigned int index = hashCode % map->capacity;
+    ArrayList *bucket = map->content[index];
+
+    // search for key in bucket, if exists, replace
+    for (int i = 0; i < bucket->length; i++) {
+        Entry *entry = (Entry*)arraylist_get(bucket, i);
+        // check key equal key
+        if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
+            void *oldValue = entry->value;
+            entry->value = value;
+            return oldValue;
+        }
+    }
+
+    // if not exist, add entry
+    Entry *newEntry = (Entry*) malloc(sizeof(Entry));
+    newEntry->key = key;
+    newEntry->value = value;
+    newEntry->hashCode = hashCode;
+    arraylist_add_last(bucket, newEntry);
+
+    map->size += 1;
+    return NULL;
+}
+
+void *hashmapGet(HashMap *map, void *key) {
+    int hashCode = map->hashFunction(key);
+    unsigned int index = hashCode % map->capacity;
+    ArrayList* bucket = map->content[index];
+
+    // Check if the key exists in the bucket
+    for (int i = 0; i < bucket->length; ++i) {
+        Entry *entry = (Entry*)arraylist_get(bucket, i);
+        // check key equal key
+        if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
+            // Key found, return the associated value
+            return entry->value;
+        }
+    }
+
+    // Key not found
+    return NULL;
+}
+
+void freeHashmap(HashMap *map, Consume1 freeKey, Consume1 freeValue) {
+    if (map == NULL) {
+        return;
+    }
+
+    hashmapFreeContent(map->content, map->capacity, freeKey, freeValue);
+
+    free(map);
+}
+
+ArrayList *keySet(HashMap *map) {
+    ArrayList *list = arraylist_create();
+
+    for (int i = 0; i < map->capacity; ++i) {
+        ArrayList *bucket = map->content[i];
+        for (int j = 0; j < bucket->length; j++) {
+            Entry *entry = (Entry*)arraylist_get(bucket, j);
+            arraylist_add_last(list,entry->key);
+        }
+    }
+
+    return NULL;
+}
+
+
+
+
+#endif //INYEAR4_1_HASH_MAP_H
+
+int hashInt(void *vi) {
+    int value = void2(int, vi);
+    value ^= value >> 16;
+    value *= 0x85ebca6b;
+    value ^= value >> 13;
+    value *= 0xc2b2ae35;
+    value ^= value >> 16;
+    return value;
+}
+
+int hashVoid(void *v, size_t size) {
+    int hash = 17;
+
+    char *c = (char*)v;
+
+    for (int i = 0; i < size; i++) {
+        hash = (hash * 33) ^ c[i];
+    }
+
+    return hash;
+}
+
+int hashString(const char *c) {
+    int hash = 17;
+
+    for (int i = 0; c[i] != '\0'; i++) {
+        hash = (hash * 33) ^ c[i];
+    }
+
+    return hash;
+}
+
+
 #pragma endregion
 
 
-#include <stdio.h>
-Tree *tree;
 
-void makeRoot(char *command) {
-    int id;
-    sscanf(command + 8, "%d", &id);
-
-    TreeNode *root = bTreeMakeNode(copy2heap(&id, sizeof(int)));
-    tree = makeBTree(root);
+int hashStr(char* str) {
+    return hashString(str);
 }
 
-void addLeftChild(char *command) {
-    int parentId, curId;
-    sscanf(command + 12, "%d %d", &parentId, &curId);
-
-    // find the parent
-    TreeNode *parent = bTreeFindNode(&parentId, tree, intCmp);
-    if (!parent)
-        return;
-
-    if (parent->left) return;
-    TreeNode *nnode = bTreeMakeNode(copy2heap(&curId, sizeof(int)));
-    parent->left =  nnode;
+int strCom(char** str1, char** str2) {
+    return strcmp(*str1, *str2);
 }
 
-void addRightChild(char *command) {
-    int parentId, curId;
-    sscanf(command + 13, "%d %d", &parentId, &curId);
+int main() {
+    HashMap *map = createHashmap((HashFunction) hashStr, (CompareFunction) strcmp);
 
-    // find the parent
-    TreeNode *parent = bTreeFindNode(&parentId, tree, intCmp);
-    if (!parent)
-        return;
-    if (parent->right) return;
-    TreeNode *nnode = bTreeMakeNode(copy2heap(&curId, sizeof(int)));
-    parent->right = nnode;
-}
+    char *line = (char*)malloc(1024);
+    char *successfully = fgets(line, 1024, stdin);
+    while (successfully) {
+        char* word = strtok(line, " ");
+        while (word){
+            void *value = hashmapGet(map, word);
 
-void printNodeData(void *data) {
-    printf("%d ", void2(int, data));
-}
+            if (value) {
+                int *intValue = (int *) value;
+                *intValue += 1;
+            } else {
+                int intValue = 1;
+                hashmapPut(map, strdup(word), copy2heap(&intValue, sizeof(int)));
+            }
 
-void inOrder() {
-    bTreeInOrder(tree, printNodeData);
-}
-
-void preOrder() {
-    bTreePreOrder(tree, printNodeData);
-}
-
-void postOrder() {
-    bTreePostOrder(tree, printNodeData);
-}
-
-int countNodesWith2Children(TreeNode *node) {
-    if (node == NULL) return 0;
-
-    int cl = countNodesWith2Children(node->left);
-    int cr = countNodesWith2Children(node->right);
-
-    int total = cl + cr;
-
-    if (node->left != NULL && node->right != NULL) {
-        total++;
-    }
-
-    return total;
-}
-
-int isRootMaxHeap(TreeNode *node) {
-    if (!node)
-        return 1;
-
-    if ((node->left != NULL && intCmp(node->data, node->left->data) < 0) ||
-        (node->right != NULL && intCmp(node->data, node->right->data) < 0)) {
-        return 0;
-    }
-
-    return isRootMaxHeap(node->left) && isRootMaxHeap(node->right);
-}
-
-int isMaxHeap(char *command) {
-    int parentId;
-    sscanf(command + 9, "%d", &parentId);
-
-    // find the parent
-    TreeNode *node = bTreeFindNode(&parentId, tree, intCmp);
-    return isRootMaxHeap(node);
-}
-
-int main(int argc, const char *argv[]) {
-    char *line = (char *) malloc(1024);
-
-    while (1) {
-        fgets(line, 1024, stdin);
-        if (strncmp("Quit", line, 4) == 0)
-            break;
-        if (strncmp("CountNodes2Children", line, 6) == 0) {
-            int res = countNodesWith2Children(tree->root);
-            printf("%d", res);
+            word = strtok(NULL, " ");
         }
-        if (strncmp("InOrder", line, 7) == 0)
-            inOrder();
-        if (strncmp("PreOrder", line, 8) == 0)
-            preOrder();
-        if (strncmp("PostOrder", line, 9) == 0)
-            postOrder();
-        if (strncmp("MakeRoot", line, 8) == 0)
-            makeRoot(line);
-        if (strncmp("AddLeftChild", line, 10) == 0)
-            addLeftChild(line);
-        if (strncmp("AddRightChild", line, 5) == 0)
-            addRightChild(line);
-        if (strncmp("IsMaxHeap", line, 9) == 0) {
-            int res = isMaxHeap(line);
-            printf("%d\n", res);
-        }
+
+
+        successfully = fgets(line, 1024, stdin);
     }
 
-    return 0;
+    ArrayList *list = keySet(map);
+    qsort(list->content, list->length, sizeof(void*), (__compar_fn_t) strCom);
+
+    for (int i = 0; i < list->length; i ++) {
+        printf("%s %d", (char*) list->content[i], void2(int, hashmapGet(map, list->content[i])));
+    }
 }

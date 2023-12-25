@@ -9,8 +9,8 @@ void makeRoot(char *command) {
     int id;
     sscanf(command + 8, "%d", &id);
 
-    TreeNode *root = treeMakeNode(copy2heap(&id, sizeof(int)));
-    tree = treeMakeTree(root);
+    TreeNode *root = treeCreateNode(copy2heap(&id, sizeof(int)));
+    tree = createTree(root);
 }
 
 void insert(char *command) {
@@ -49,7 +49,7 @@ void height(char *command) {
     int nodeId;
     sscanf(command + 6, "%d", &nodeId);
     TreeNode *root = treeFindNode(&nodeId, tree, intCmp);
-    Tree *tmpTree = treeMakeTree(root);
+    Tree *tmpTree = createTree(root);
     printf("%ld\n", treeHeight(tmpTree));
     free(tmpTree);
 }

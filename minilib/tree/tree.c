@@ -3,13 +3,13 @@
 #include "list/single_linked_list.h"
 #include "stdlib.h"
 
-TreeNode *treeMakeNode(void *data) {
+TreeNode *treeCreateNode(void *data) {
     quickCalloc(TreeNode, node);
     node->data = data;
     return node;
 }
 
-Tree *treeMakeTree(TreeNode *root) {
+Tree *createTree(TreeNode *root) {
     quickCalloc(Tree, tree);
     tree->root = root;
     return tree;
@@ -43,7 +43,7 @@ void treeAddLastChild(TreeNode *node, void *data) {
         return;
 
     // make new node
-    TreeNode *cur = treeMakeNode(data);
+    TreeNode *cur = treeCreateNode(data);
     // find child
     TreeNode *child = node->left;
     // if no child, just add
@@ -66,35 +66,35 @@ void treePreOrder(Tree *t, Consume1 action) {
     if (!root) return;
 
     // stack of node
-    Stack *stackOfTop = stack_create();
-    stack_push(stackOfTop, root);
+    Stack *stackOfTop = createStack();
+    stackPush(stackOfTop, root);
 
     // the data in preorder will be stored here
-    SingleLinkedList *dataInPreOrder = sll_create();
+    SingleLinkedList *dataInPreOrder = CreateSll();
 
     while (stackOfTop->length > 0) {
         // get node add to back of data list
-        TreeNode *node = (TreeNode *) stack_pop(stackOfTop);
-        sll_add_last(dataInPreOrder, node->data);
+        TreeNode *node = (TreeNode *) stackPop(stackOfTop);
+        sllAddLast(dataInPreOrder, node->data);
 
         // push all child in revert order
         TreeNode *child = node->left;
-        Stack *revertor = stack_create();
+        Stack *revertor = createStack();
         while (child) {
-            stack_push(revertor, child);
+            stackPush(revertor, child);
             // go to next sibling;
             child = child->right;
         }
-        while (revertor->length > 0) stack_push(stackOfTop, stack_pop(revertor));
-        stack_free(revertor);
+        while (revertor->length > 0) stackPush(stackOfTop, stackPop(revertor));
+        stackFree(revertor);
     }
 
     sll_foreach(data, dataInPreOrder) {
         action(data);
     }
 
-    sll_free(dataInPreOrder);
-    stack_free(stackOfTop);
+    sllFree(dataInPreOrder);
+    stackFree(stackOfTop);
 }
 
 void nodeInOrder(TreeNode *root, Consume1 action) {
@@ -145,15 +145,15 @@ TreeNode *getChild(TreeNode *parent, int index) {
 }
 
 void nodePostOrder(TreeNode *root, Consume1 action) {
-    Stack *nodeStack = stack_create();
-    Stack *indexStack = stack_create();
+    Stack *nodeStack = createStack();
+    Stack *indexStack = createStack();
     int rootIndex = 0;
-    SingleLinkedList *list = sll_create();
+    SingleLinkedList *list = CreateSll();
 
     while (root || nodeStack->length > 0) {
         if (root) {
-            stack_push(nodeStack, root);
-            stack_push(indexStack, copy2heap(&rootIndex, sizeof(int)));
+            stackPush(nodeStack, root);
+            stackPush(indexStack, copy2heap(&rootIndex, sizeof(int)));
             rootIndex = 0;
 
             // move to child
@@ -161,23 +161,23 @@ void nodePostOrder(TreeNode *root, Consume1 action) {
             continue; // continue until no more first child
         }
 
-        TreeNode *node = (TreeNode *) stack_pop(nodeStack);
-        int *nodeIndex = (int *) stack_pop(indexStack);
+        TreeNode *node = (TreeNode *) stackPop(nodeStack);
+        int *nodeIndex = (int *) stackPop(indexStack);
 
-        sll_add_last(list, node->data);
+        sllAddLast(list, node->data);
 
         // pop all children of a node
-        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode *) stack_peek(nodeStack)) - 1) {
-            node = (TreeNode *) stack_pop(nodeStack);
+        while (nodeStack->length > 0 && *nodeIndex == childrenCount((TreeNode *) stackPeek(nodeStack)) - 1) {
+            node = (TreeNode *) stackPop(nodeStack);
             free(nodeIndex);
-            nodeIndex = (int *) stack_pop(indexStack);
+            nodeIndex = (int *) stackPop(indexStack);
 
-            sll_add_last(list, node->data);
+            sllAddLast(list, node->data);
         }
 
         // if there is another layer assign the root
         if (nodeStack->length > 0) {
-            root = getChild(((TreeNode *) stack_peek(nodeStack)), *nodeIndex + 1);
+            root = getChild(((TreeNode *) stackPeek(nodeStack)), *nodeIndex + 1);
             rootIndex = *nodeIndex + 1;
         }
         free(nodeIndex);
@@ -187,9 +187,9 @@ void nodePostOrder(TreeNode *root, Consume1 action) {
         action(o);
     }
 
-    stack_free(nodeStack);
-    stack_free(indexStack);
-    sll_free(list);
+    stackFree(nodeStack);
+    stackFree(indexStack);
+    sllFree(list);
 }
 
 void treePostOrder(Tree *t, Consume1 action) {

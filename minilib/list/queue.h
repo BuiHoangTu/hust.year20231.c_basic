@@ -5,15 +5,15 @@
 
 #define Queue SingleLinkedList
 
-Queue* queue_create();
+Queue* createQueue();
 
 void enqueue(Queue* queue, void* value);
 
 void* dequeue(Queue* queue);
 
-void* queue_peek(Queue* queue);
+void* queuePeek(Queue* queue);
 
-void queue_free(Queue* queue);
+void queueFree(Queue* queue);
 
 
 #endif // QUEUE_H_

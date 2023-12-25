@@ -7,38 +7,38 @@
 
 int main() {
     int i;
-    Stack *stack = stack_create();
-    SingleLinkedList *list = sll_create();
+    Stack *stack = createStack();
+    SingleLinkedList *list = CreateSll();
     void* pop;
 
     i = 10;
-    stack_push(stack, copy2heap(&i, sizeof(int)));
+    stackPush(stack, copy2heap(&i, sizeof(int)));
 
-    pop = stack_pop(stack);
-    sll_add_last(list, pop);
+    pop = stackPop(stack);
+    sllAddLast(list, pop);
 
     i = 11;
-    stack_push(stack, copy2heap(&i, sizeof(int)));
+    stackPush(stack, copy2heap(&i, sizeof(int)));
 
     i = 1;
-    stack_push(stack, copy2heap(&i, sizeof(int)));
+    stackPush(stack, copy2heap(&i, sizeof(int)));
 
     i = 3;
-    stack_push(stack, copy2heap(&i, sizeof(int)));
+    stackPush(stack, copy2heap(&i, sizeof(int)));
 
     // 11
-    pop = stack_pop(stack);
-    sll_add_last(list, pop);
+    pop = stackPop(stack);
+    sllAddLast(list, pop);
 
     i = 5;
-    stack_push(stack, copy2heap(&i, sizeof(int)));
+    stackPush(stack, copy2heap(&i, sizeof(int)));
 
     i = 4;
-    stack_push(stack, copy2heap(&i, sizeof(int)));
+    stackPush(stack, copy2heap(&i, sizeof(int)));
 
     // 5
-    pop = stack_pop(stack);
-    sll_add_last(list, pop);
+    pop = stackPop(stack);
+    sllAddLast(list, pop);
 
 
     printf("\nPrint all\n");

@@ -19,28 +19,28 @@ typedef struct sll
 /**
  * Create a SingleLinkedList
 */
-SingleLinkedList *sll_create();
+SingleLinkedList *CreateSll();
 
 /**
  * Add an object to the last part of the list 
 */
-void sll_add_last(SingleLinkedList *list, void *value);
+void sllAddLast(SingleLinkedList *list, void *value);
 
 /**
  * Add an object at the index 
  * @return 1: success; 0: index out of bound
 */
-int sll_insert(SingleLinkedList *list, void *value, int index);
+int sllInsert(SingleLinkedList *list, void *value, int index);
 
 /**
  * Get an object at the index
 */
-void *sll_get(SingleLinkedList *list, int index);
+void *sllGet(SingleLinkedList *list, int index);
 
 /**
  * Remove an object at index, return that object 
 */
-void *sll_remove(SingleLinkedList *list, int index);
+void *sllRemove(SingleLinkedList *list, int index);
 
 /**
  * Move node to next node and obj to the value of the next node
@@ -56,6 +56,6 @@ int sll_next(SingleLinkedNode **node, void **obj);
 	void *obj;                             \
 	while (sll_next(&_node, &obj))
 
-void sll_free(SingleLinkedList* list);
+void sllFree(SingleLinkedList* list);
 
 #endif // SLL_H_
