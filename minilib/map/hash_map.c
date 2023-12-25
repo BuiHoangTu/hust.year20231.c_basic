@@ -51,7 +51,7 @@ void enlargeHashmap(HashMap *map) {
         ArrayList *oldBucket = oldContent[i];
         for (int j = 0; j < oldBucket->length; i++) {
             Entry *entry = (Entry*) oldBucket->content[j];
-            uint newIndex = entry->hashCode % map->capacity;
+            int newIndex = abs(entry->hashCode % map->capacity);
             arraylist_add_last(map->content[newIndex], entry);
         }
     }
@@ -80,7 +80,7 @@ void *hashmapPut(HashMap *map, void *key, void *value) {
     }
 
     int hashCode = map->hashFunction(key);
-    unsigned int index = hashCode % map->capacity;
+    int index = abs(hashCode % map->capacity);
     ArrayList *bucket = map->content[index];
 
     // search for key in bucket, if exists, replace
@@ -107,7 +107,7 @@ void *hashmapPut(HashMap *map, void *key, void *value) {
 
 void *hashmapGet(HashMap *map, void *key) {
     int hashCode = map->hashFunction(key);
-    unsigned int index = hashCode % map->capacity;
+    int index = abs(hashCode % map->capacity);
     ArrayList* bucket = map->content[index];
 
     // Check if the key exists in the bucket
@@ -132,6 +132,20 @@ void freeHashmap(HashMap *map, Consume1 freeKey, Consume1 freeValue) {
     hashmapFreeContent(map->content, map->capacity, freeKey, freeValue);
 
     free(map);
+}
+
+ArrayList *keySet(HashMap *map) {
+    ArrayList *list = arraylist_create();
+
+    for (int i = 0; i < map->capacity; ++i) {
+        ArrayList *bucket = map->content[i];
+        for (int j = 0; j < bucket->length; j++) {
+            Entry *entry = (Entry*)arraylist_get(bucket, j);
+            arraylist_add_last(list,entry->key);
+        }
+    }
+
+    return list;
 }
 
 

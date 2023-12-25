@@ -38,6 +38,8 @@ void *hashmapPut(HashMap *map, void *key, void *value);
 
 void *hashmapGet(HashMap *map, void *key);
 
+ArrayList *keySet(HashMap *map);
+
 void freeHashmap(HashMap* map, Consume1 freeKey, Consume1 freeValue);
 
 #endif //INYEAR4_1_HASH_MAP_H
