@@ -1248,66 +1248,59 @@ void bTreePostOrder(Tree *t, Consume1 action) {
 
 #pragma endregion
 
+#define DATA 1
+#define CMD 2
+
+
 int hashStr(char* str) {
     return hashString(str);
 }
 
-int strCom(char** str1, char** str2) {
-    return strcmp(*str1, *str2);
-}
-
 int main() {
-    char *line = (char*)malloc(25);
+    char *line = (char*)malloc(1024);
     HashMap *map = createHashmap((HashFunction) hashStr, (CompareFunction) strcmp);
-    FILE *source = stdin;
 
-    if (source == NULL) {
-        getcwd(line, 25);
-        printf(line);
-        exit(1);
-    }
+    int mode = DATA;
 
-
-
-    // read until eof
-    int n = 0;
-    char c = ' ';
     while (1) {
-        c = fgetc(source);
+        fgets(line, 1024, stdin);
 
-        // if not char, treat as \0
-        if (c == '\n' || c == ' ' || c == '\r' || c == EOF) {
-            // if not in word yet, skip
-            if (n > 0) {
-                line[n++] = '\0';
-
-                // try to get from map
-                void *countVal = hashmapGet(map, line);
-
-                // if not exist, put to map
-                if (countVal == NULL) {
-                    char *word = strdup(line);
-                    int count = 1;
-
-                    hashmapPut(map, word, copy2heap(&count, sizeof(int)));
-                } else {
-                    // increase count in map
-                    (*(int *) countVal) += 1;
-                }
+        if (mode == DATA) {
+            if (strncmp(line, "*", 1) == 0) {
+                mode = CMD;
+                continue;
             }
 
-            // start over new word
-            n = 0;
-        } else line[n++] = c;
+            char *key = strndup(line, strlen(line) + 2);
+            hashmapPut(map, key, key);
 
-        if (c == EOF) break;
-    }
+        } else {
+            if (strncmp(line, "***", 3) == 0) {
+                break;
+            }
 
-    ArrayList *list = keySet(map);
-    qsort(list->content, list->length, sizeof(void*), (__compar_fn_t) strCom);
+            char *cmd = strtok(line, " ");
+            char *rest = strtok(NULL, " ");
 
-    for (int i = 0; i < list->length; i ++) {
-        printf("%s %d\n", (char*) list->content[i], void2(int, hashmapGet(map, list->content[i])));
+            char *key = strndup(rest, strlen(rest));
+            void *val = hashmapGet(map, key);
+
+            if (strncmp(cmd, "find", 4) == 0) {
+                if (val) printf("1\n");
+                else printf("0\n");
+
+                free(key);
+                continue;
+            }
+
+            if (strncmp(cmd, "insert", 5) == 0) {
+                if (val) printf("0\n");
+                else {
+                    printf("1\n");
+                    hashmapPut(map, key, key);
+                }
+                continue;
+            }
+        }
     }
 }
-
