@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include "stdlib.h"
+#include <stdlib.h>
+#include <string.h>
 
-#pragma region minilib-combined
+
+#pragma region heap.h
 #ifndef HEAP_H_
 #define HEAP_H_
 
-#include <stdlib.h>
-#include <string.h>
 
 #define quickCalloc(type, variable) type *variable = (type *) calloc (1, sizeof(type))
 
@@ -14,7 +14,8 @@
 
 void *copy2heap(void *data, size_t data_size);
 
-void *copy2heap(void *data, size_t data_size) {
+void *copy2heap(void *data, size_t data_size)
+{
     void *p = malloc(data_size);
     memcpy(p, data, data_size);
     return p;
@@ -22,26 +23,39 @@ void *copy2heap(void *data, size_t data_size) {
 
 #endif // HEAP_H_
 
+#pragma endregion
+
+#pragma region type.h
 #ifndef TYPE_H_
 #define TYPE_H_
-
 /**
  * A function defining how 2 compare unk variable (generic structure)
  */
 typedef int (*CompareFunction)(void *, void *);
 
+/**
+ * An action
+ */
 typedef void (*Action)();
 
+/**
+ * Consume 1 void data to do something <br>
+ * Ex: free pointer, print pointer
+ */
 typedef void (*Consume1)(void *);
 
+/**
+ * Hash a void data
+ */
 typedef int (*HashFunction)(void *);
 
 /**
- *
+ * Compare 2 data
  */
 int intCmp(void *v1, void *v2);
 
-int intCmp(void *v1, void *v2) {
+int intCmp(void *v1, void *v2)
+{
     int i1 = void2(int, v1);
     int i2 = void2(int, v2);
 
@@ -49,253 +63,61 @@ int intCmp(void *v1, void *v2) {
 }
 
 #endif // TYPE_H_
+#pragma endregion
 
-#ifndef SLL_H_
-#define SLL_H_
+#pragma region hash.h
 
-#include <stdlib.h>
+//
+// Created by tu on 12/11/23.
+//
 
-typedef struct sln {
-    void *value;
-    struct sln *next;
-} SingleLinkedNode;
+#ifndef INYEAR4_1_HASH_H
+#define INYEAR4_1_HASH_H
 
-typedef struct sll {
-    int length;
-    SingleLinkedNode *first;
-    SingleLinkedNode *last;
-} SingleLinkedList;
+int hashInt(void *vi);
 
-/**
- * Create a SingleLinkedList
-*/
-SingleLinkedList *CreateSll();
+int hashVoid(void *v, size_t size);
 
-/**
- * Add an object to the last part of the list 
-*/
-void sllAddLast(SingleLinkedList *list, void *value);
+int hashString(const char *c);
 
-/**
- * Add an object at the index 
- * @return 1: success; 0: index out of bound
-*/
-int sllInsert(SingleLinkedList *list, void *value, int index);
+#endif //INYEAR4_1_HASH_H
 
-/**
- * Get an object at the index
-*/
-void *sllGet(SingleLinkedList *list, int index);
-
-/**
- * Remove an object at index, return that object 
-*/
-void *sllRemove(SingleLinkedList *list, int index);
-
-/**
- * Move node to next node and obj to the value of the next node
- * @param node: address of pointer to the current node 
- * @param obj: address of pointer to the variable to store value
- * @return 1: if the operation success
- *         0: if node is already the last node
-*/
-int sll_next(SingleLinkedNode **node, void **obj);
-
-#define sll_foreach(obj, list)             \
-    SingleLinkedNode *_node = list->first; \
-    void *obj;                             \
-    while (sll_next(&_node, &obj))
-
-void sllFree(SingleLinkedList *list);
-
-
-SingleLinkedList *CreateSll() {
-    SingleLinkedList *list = (SingleLinkedList *) malloc(sizeof(SingleLinkedList));
-    list->first = NULL;
-    list->last = NULL;
-    list->length = 0;
-
-    return list;
-}
-
-/**
- * Get node at index
- */
-SingleLinkedNode *__sll_get_node(SingleLinkedList *list, int index) {
-    if (index >= list->length) return NULL;
-
-    SingleLinkedNode *current = list->first;
-    for (int i = 0; i < index; i++) {
-        current = current->next;
-    }
-
-    return current;
-}
-
-/**
- * add node to the last, increase length
- */
-void __sll_add_node_last(SingleLinkedList *list, SingleLinkedNode *node) {
-    // increase length
-    list->length++;
-    // if empty list
-    if (list->first == NULL) {
-        // add node to both first and last
-        list->first = list->last = node;
-    } else // add node after last
-    {
-        list->last->next = node;
-        list->last = node;
-    }
-}
-
-/**
- * insert node at index, increase length
- */
-int __sll_insert_node(SingleLinkedList *list, SingleLinkedNode *node, int index) {
-    if (index > list->length) return 0;
-
-    // if insert at first
-    if (index == 0) {
-        node->next = list->first;
-        list->first = node;
-        list->length++;
-        return 1;
-    }
-        // insert last
-    else if (index == list->length) {
-        // this function increase already
-        __sll_add_node_last(list, node);
-        return 1;
-    } else {
-        // add node at middle
-        SingleLinkedNode *current = __sll_get_node(list, index - 1);
-        // add next node
-        node->next = current->next;
-        // add this node
-        current->next = node;
-        list->length++;
-        return 1;
-    }
-}
-
-/**
- * remove a node, decrease length, free the node
- * @param prevNode: the node before the node need removing
- * @return value that the node holds
- */
-void *__sll_remove_node(SingleLinkedList *list, SingleLinkedNode *node, SingleLinkedNode *prevNode) {
-    // node is first node
-    if (prevNode == NULL) {
-        list->first = node->next;
-    }
-        // node is the last node
-    else if (node->next == NULL) {
-        prevNode->next = NULL;
-        list->last = prevNode;
-    }
-        // node is in the middle
-    else {
-        prevNode->next = node->next;
-    }
-
-    list->length--;
-    void *value = node->value;
-    free(node);
+int hashInt(void *vi) {
+    int value = void2(int, vi);
+    value ^= value >> 16;
+    value *= 0x85ebca6b;
+    value ^= value >> 13;
+    value *= 0xc2b2ae35;
+    value ^= value >> 16;
     return value;
 }
 
-SingleLinkedNode *sln_create(void *value) {
-    SingleLinkedNode *node = (SingleLinkedNode *) malloc(sizeof(SingleLinkedNode));
-    node->next = NULL;
-    node->value = value;
-    return node;
-}
+int hashVoid(void *v, size_t size) {
+    int hash = 17;
 
-void sllAddLast(SingleLinkedList *list, void *value) {
-    SingleLinkedNode *newNode = sln_create(value);
-    __sll_add_node_last(list, newNode);
-}
+    char *c = (char*)v;
 
-int sllInsert(SingleLinkedList *list, void *value, int index) {
-    SingleLinkedNode *newNode = sln_create(value);
-    return __sll_insert_node(list, newNode, index);
-}
-
-void *sllGet(SingleLinkedList *list, int index) {
-    SingleLinkedNode *node = __sll_get_node(list, index);
-    return node == NULL ? NULL : node->value;
-}
-
-void *sllRemove(SingleLinkedList *list, int index) {
-    if (index >= list->length)
-        return NULL;
-
-    if (index == 0) {
-        return __sll_remove_node(list, list->first, NULL);
+    for (int i = 0; i < size; i++) {
+        hash = (hash * 33) ^ c[i];
     }
 
-    SingleLinkedNode *prev = __sll_get_node(list, index - 1);
-    SingleLinkedNode *current = prev->next;
-
-    return __sll_remove_node(list, current, prev);
+    return hash;
 }
 
-int sll_next(SingleLinkedNode **node, void **obj) {
-    if ((*node) == NULL)
-        return 0;
+int hashString(const char *c) {
+    int hash = 17;
 
-    *obj = (*node)->value;
-    (*node) = (*node)->next;
+    for (int i = 0; c[i] != '\0'; i++) {
+        hash = (hash * 33) ^ c[i];
+    }
 
-    return 1;
+    return hash;
 }
 
-void sllFree(SingleLinkedList *list) {
-    free(list);
-}
 
-#endif // SLL_H_
+#pragma endregion
 
-
-#ifndef QUEUE_H_
-#define QUEUE_H_
-
-#define Queue SingleLinkedList
-
-Queue *createQueue();
-
-void enqueue(Queue *queue, void *value);
-
-void *dequeue(Queue *queue);
-
-void *queuePeek(Queue *queue);
-
-void queueFree(Queue *queue);
-
-
-Queue *createQueue() {
-    return CreateSll();
-}
-
-void enqueue(Queue *queue, void *value) {
-    sllAddLast(queue, value);
-}
-
-void *dequeue(Queue *queue) {
-    return sllRemove(queue, 0);
-}
-
-void *queuePeek(Queue *queue) {
-    return sllGet(queue, 0);
-}
-
-void queueFree(Queue *queue) {
-    sllFree(queue);
-}
-
-#endif // QUEUE_H_
-
+#pragma region array_list
 //
 // Created by bhtuw on 19/11/2023.
 //
@@ -344,6 +166,12 @@ void _arraylist_next(ArrayList *list, int *index, void **obj);
     for (void *obj = list->content[0]; _i < list->length; _arraylist_next(list, &_i, &obj))
 
 void arraylist_free(ArrayList *list);
+
+#endif //MINI_LIBRARY_ARRAY_LIST_H
+
+//
+// Created by bhtuw on 19/11/2023.
+//
 
 #define MIN_CAPACITY 10
 #define ALLOCATE_THRESHOLD (100 / 100)
@@ -425,47 +253,565 @@ void arraylist_free(ArrayList *list)
 }
 
 
-#endif //MINI_LIBRARY_ARRAY_LIST_H
+#pragma endregion
+
+#pragma region sll
+
+#ifndef SLL_H_
+#define SLL_H_
+
+typedef struct sln
+{
+    void *value;
+    struct sln *next;
+} SingleLinkedNode;
+
+typedef struct sll
+{
+    int length;
+    SingleLinkedNode *first;
+    SingleLinkedNode *last;
+} SingleLinkedList;
+
+/**
+ * Create a SingleLinkedList
+*/
+SingleLinkedList *CreateSll();
+
+/**
+ * Add an object to the last part of the list
+*/
+void sllAddLast(SingleLinkedList *list, void *value);
+
+/**
+ * Add an object at the index
+ * @return 1: success; 0: index out of bound
+*/
+int sllInsert(SingleLinkedList *list, void *value, int index);
+
+/**
+ * Get an object at the index
+*/
+void *sllGet(SingleLinkedList *list, int index);
+
+/**
+ * Remove an object at index, return that object
+*/
+void *sllRemove(SingleLinkedList *list, int index);
+
+/**
+ * Move node to next node and obj to the value of the next node
+ * @param node: address of pointer to the current node
+ * @param obj: address of pointer to the variable to store value
+ * @return 1: if the operation success
+ *         0: if node is already the last node
+*/
+int sll_next(SingleLinkedNode **node, void **obj);
+
+#define sll_foreach(obj, list)             \
+	SingleLinkedNode *_node = list->first; \
+	void *obj;                             \
+	while (sll_next(&_node, &obj))
+
+void sllFree(SingleLinkedList* list);
+
+#endif // SLL_H_
 
 
-#ifndef STACK_H_
-#define STACK_H_
+SingleLinkedList *CreateSll()
+{
+    SingleLinkedList *list = (SingleLinkedList *)malloc(sizeof(SingleLinkedList));
+    list->first = NULL;
+    list->last = NULL;
+    list->length = 0;
 
-#define Stack SingleLinkedList
+    return list;
+}
 
-Stack *createStack();
+/**
+ * Get node at index
+ */
+SingleLinkedNode *__sll_get_node(SingleLinkedList *list, int index)
+{
+    if (index >= list->length) return NULL;
 
-void stackPush(Stack *stack, void *value);
+    SingleLinkedNode *current = list->first;
+    for (int i = 0; i < index; i++)
+    {
+        current = current->next;
+    }
 
-void *stackPop(Stack *stack);
+    return current;
+}
 
-void *stackPeek(Stack *stack);
+/**
+ * add node to the last, increase length
+ */
+void __sll_add_node_last(SingleLinkedList *list, SingleLinkedNode *node)
+{
+    // increase length
+    list->length++;
+    // if empty list
+    if (list->first == NULL)
+    {
+        // add node to both first and last
+        list->first = list->last = node;
+    }
+    else // add node after last
+    {
+        list->last->next = node;
+        list->last = node;
+    }
+}
 
-void stackFree(Stack *stack);
+/**
+ * insert node at index, increase length
+ */
+int __sll_insert_node(SingleLinkedList *list, SingleLinkedNode *node, int index)
+{
+    if (index > list->length) return 0;
 
-Stack *createStack() {
+    // if insert at first
+    if (index == 0)
+    {
+        node->next = list->first;
+        list->first = node;
+        list->length++;
+        return 1;
+    }
+        // insert last
+    else if (index == list->length)
+    {
+        // this function increase already
+        __sll_add_node_last(list, node);
+        return 1;
+    }
+    else
+    {
+        // add node at middle
+        SingleLinkedNode *current = __sll_get_node(list, index - 1);
+        // add next node
+        node->next = current->next;
+        // add this node
+        current->next = node;
+        list->length++;
+        return 1;
+    }
+}
+
+/**
+ * remove a node, decrease length, free the node
+ * @param prevNode: the node before the node need removing
+ * @return value that the node holds
+ */
+void *__sll_remove_node(SingleLinkedList *list, SingleLinkedNode *node, SingleLinkedNode *prevNode)
+{
+    // node is first node
+    if (prevNode == NULL)
+    {
+        list->first = node->next;
+    }
+        // node is the last node
+    else if (node->next == NULL)
+    {
+        prevNode->next = NULL;
+        list->last = prevNode;
+    }
+        // node is in the middle
+    else
+    {
+        prevNode->next = node->next;
+    }
+
+    list->length--;
+    void *value = node->value;
+    free(node);
+    return value;
+}
+
+SingleLinkedNode *sln_create(void *value)
+{
+    SingleLinkedNode *node = (SingleLinkedNode *)malloc(sizeof(SingleLinkedNode));
+    node->next = NULL;
+    node->value = value;
+    return node;
+}
+
+void sllAddLast(SingleLinkedList *list, void *value)
+{
+    SingleLinkedNode *newNode = sln_create(value);
+    __sll_add_node_last(list, newNode);
+}
+
+int sllInsert(SingleLinkedList *list, void *value, int index)
+{
+    SingleLinkedNode *newNode = sln_create(value);
+    return __sll_insert_node(list, newNode, index);
+}
+
+void *sllGet(SingleLinkedList *list, int index)
+{
+    SingleLinkedNode* node = __sll_get_node(list, index);
+    return node == NULL ? NULL : node->value;
+}
+
+void *sllRemove(SingleLinkedList *list, int index)
+{
+    if (index >= list->length)
+        return NULL;
+
+    if (index == 0)
+    {
+        return __sll_remove_node(list, list->first, NULL);
+    }
+
+    SingleLinkedNode *prev = __sll_get_node(list, index - 1);
+    SingleLinkedNode *current = prev->next;
+
+    return __sll_remove_node(list, current, prev);
+}
+
+int sll_next(SingleLinkedNode **node, void **obj)
+{
+    if ((*node) == NULL)
+        return 0;
+
+    *obj = (*node)->value;
+    (*node) = (*node)->next;
+
+    return 1;
+}
+
+void sllFree(SingleLinkedList *list)
+{
+    free(list);
+}
+
+
+#pragma endregion
+
+#pragma region queue
+#ifndef QUEUE_H_
+#define QUEUE_H_
+
+#define Queue SingleLinkedList
+
+Queue* createQueue();
+
+void enqueue(Queue* queue, void* value);
+
+void* dequeue(Queue* queue);
+
+void* queuePeek(Queue* queue);
+
+void queueFree(Queue* queue);
+
+
+#endif // QUEUE_H_
+
+Queue* createQueue() {
     return CreateSll();
 }
 
-void stackPush(Stack *stack, void *value) {
-    sllInsert(stack, value, 0);
+void enqueue(Queue* queue, void* value) {
+    sllAddLast(queue, value);
 }
 
-void *stackPop(Stack *stack) {
-    return sllRemove(stack, 0);
+void* dequeue(Queue* queue) {
+    return sllRemove(queue, 0);
 }
 
-void *stackPeek(Stack *stack) {
-    return sllGet(stack, 0);
+void* queuePeek(Queue* queue) {
+    return sllGet(queue, 0);
 }
 
-void stackFree(Stack *stack) {
-    sllFree(stack);
+void queueFree(Queue* queue) {
+    sllFree(queue);
 }
+
+
+#pragma endregion
+
+#pragma region stack
+#ifndef STACK_H_
+#define STACK_H_
+
+
+#define Stack SingleLinkedList
+
+Stack* createStack();
+
+void stackPush(Stack* stack, void* value);
+
+void* stackPop(Stack* stack);
+
+void* stackPeek(Stack* stack);
+
+void stackFree(Stack* stack);
 
 
 #endif // STACK_H_
 
+Stack* createStack() {
+    return CreateSll();
+}
+
+void stackPush(Stack* stack, void* value) {
+    sllInsert(stack, value, 0);
+}
+
+void* stackPop(Stack* stack) {
+    return sllRemove(stack, 0);
+}
+
+void* stackPeek(Stack* stack) {
+    return sllGet(stack, 0);
+}
+
+void stackFree(Stack* stack) {
+    sllFree(stack);
+}
+
+#pragma endregion
+
+#pragma region map
+//
+// Created by tu on 12/11/23.
+//
+
+#ifndef INYEAR4_1_HASH_MAP_H
+#define INYEAR4_1_HASH_MAP_H
+
+/**
+ * @param size: how many elements are in the map <br>
+ * @param capacity: length of content <br>
+ * @param content: array of array_list <br>
+ * @param hashFunction: how to hash a key
+ * @param compareFunction: how to compare 2 key
+ */
+typedef struct hash_map {
+    ArrayList** content;
+    int size;
+    int capacity;
+    HashFunction hashFunction;
+    CompareFunction compareFunction;
+}HashMap;
+
+HashMap *createHashmap(HashFunction hashFunction, CompareFunction compareFunction);
+
+/**
+ * Insert value to map
+ * @param map
+ * @param key
+ * @param value new value
+ * @param compare compare 2 key
+ * @return old value if key existed <br>
+ * NULL if no existed key
+ */
+void *hashmapPut(HashMap *map, void *key, void *value);
+
+void *hashmapGet(HashMap *map, void *key);
+
+ArrayList *keySet(HashMap *map);
+
+void freeHashmap(HashMap* map, Consume1 freeKey, Consume1 freeValue);
+
+#endif //INYEAR4_1_HASH_MAP_H
+//
+// Created by tu on 12/11/23.
+//
+
+#define DEFAULT_MAP_SIZE 100
+#define MAP_SCALE 2
+
+typedef struct entry{
+    void *key;
+    void *value;
+    int hashCode;
+}Entry;
+
+void hashmapInitContent(HashMap *map) {
+    map->content = (ArrayList**) malloc(map->capacity * sizeof(ArrayList*));
+    for (int i = 0; i < map->capacity; i++) {
+        map->content[i] = arraylist_create();
+    }
+}
+
+void hashmapFreeContent(ArrayList **content, int length, Consume1 freeKey, Consume1 freeValue) {
+    for (int i = 0; i < length; ++i) {
+        ArrayList *bucket = content[i];
+        for (int j = 0; j < bucket->length; j++) {
+            Entry *entry = (Entry*)arraylist_get(bucket, j);
+            if (freeKey) freeKey(entry->key);
+            if (freeValue) freeValue(entry->value);
+            free(entry);
+        }
+        arraylist_free(bucket);
+    }
+
+    free(content);
+}
+
+void enlargeHashmap(HashMap *map) {
+    // get old length and map
+    int oldCapacity = map->capacity;
+    ArrayList **oldContent = map->content;
+
+    // enlarge content
+    map->capacity *= MAP_SCALE;
+    hashmapInitContent(map);
+
+    // move old content
+    for (int i = 0; i < oldCapacity; i++) {
+        ArrayList *oldBucket = oldContent[i];
+        for (int j = 0; j < oldBucket->length; i++) {
+            Entry *entry = (Entry*) oldBucket->content[j];
+            int newIndex = abs(entry->hashCode % map->capacity);
+            arraylist_add_last(map->content[newIndex], entry);
+        }
+    }
+
+    // free old content
+    hashmapFreeContent(oldContent, oldCapacity, NULL, NULL);
+}
+
+HashMap *createHashmap(HashFunction hashFunction, CompareFunction compareFunction) {
+    HashMap *map = (HashMap*)malloc(sizeof(HashMap));
+
+    map->capacity = DEFAULT_MAP_SIZE;
+
+    hashmapInitContent(map);
+
+    map->compareFunction = compareFunction;
+    map->hashFunction = hashFunction;
+    map->size = 0;
+
+    return map;
+}
+
+void *hashmapPut(HashMap *map, void *key, void *value) {
+    if (map->size >= map->capacity) {
+        enlargeHashmap(map);
+    }
+
+    int hashCode = map->hashFunction(key);
+    int index = abs(hashCode % map->capacity);
+    ArrayList *bucket = map->content[index];
+
+    // search for key in bucket, if exists, replace
+    for (int i = 0; i < bucket->length; i++) {
+        Entry *entry = (Entry*)arraylist_get(bucket, i);
+        // check key equal key
+        if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
+            void *oldValue = entry->value;
+            entry->value = value;
+            return oldValue;
+        }
+    }
+
+    // if not exist, add entry
+    Entry *newEntry = (Entry*) malloc(sizeof(Entry));
+    newEntry->key = key;
+    newEntry->value = value;
+    newEntry->hashCode = hashCode;
+    arraylist_add_last(bucket, newEntry);
+
+    map->size += 1;
+    return NULL;
+}
+
+void *hashmapGet(HashMap *map, void *key) {
+    int hashCode = map->hashFunction(key);
+    int index = abs(hashCode % map->capacity);
+    ArrayList* bucket = map->content[index];
+
+    // Check if the key exists in the bucket
+    for (int i = 0; i < bucket->length; ++i) {
+        Entry *entry = (Entry*)arraylist_get(bucket, i);
+        // check key equal key
+        if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
+            // Key found, return the associated value
+            return entry->value;
+        }
+    }
+
+    // Key not found
+    return NULL;
+}
+
+void freeHashmap(HashMap *map, Consume1 freeKey, Consume1 freeValue) {
+    if (map == NULL) {
+        return;
+    }
+
+    hashmapFreeContent(map->content, map->capacity, freeKey, freeValue);
+
+    free(map);
+}
+
+ArrayList *keySet(HashMap *map) {
+    ArrayList *list = arraylist_create();
+
+    for (int i = 0; i < map->capacity; ++i) {
+        ArrayList *bucket = map->content[i];
+        for (int j = 0; j < bucket->length; j++) {
+            Entry *entry = (Entry*)arraylist_get(bucket, j);
+            arraylist_add_last(list,entry->key);
+        }
+    }
+
+    return list;
+}
+
+
+
+#pragma endregion
+
+#pragma region search
+//
+// Created by tu on 04/12/2023.
+//
+#ifndef INYEAR4_1_BINARY_SEARCH_H
+#define INYEAR4_1_BINARY_SEARCH_H
+
+/**
+ * Find the target index in the array
+ * @param arr the array
+ * @param n length of array
+ * @param target pointer to target
+ * @param compare how to compare each elemnt in array with target
+ * @return index of target in array <br> an int that less than 0 if cant find target in array
+ */
+int binarySearch(void *arr[], int n, void *target, CompareFunction compare);
+
+#endif //INYEAR4_1_BINARY_SEARCH_H
+//
+// Created by tu on 04/12/2023.
+//
+
+int _binarySearch(void* arr[], int leftI, int rightI, void *target, CompareFunction compare) {
+    while (leftI <= rightI) {
+        int current = leftI + (rightI - leftI) / 2;
+        if (compare(arr[current], target) == 0)
+            return current;
+
+        if (compare(arr[current], target) < 0)
+            leftI = current + 1;
+        else
+            rightI = current - 1;
+    }
+    return -1;
+}
+
+
+int binarySearch(void **arr, int n, void *target, CompareFunction compare) {
+    return _binarySearch(arr, 0, n - 1, target, compare);
+}
+
+
+#pragma endregion
+
+#pragma region tree_define
 #ifndef TREE_TYPE_H_
 #define TREE_TYPE_H_
 
@@ -479,15 +825,15 @@ typedef struct tree {
 } Tree;
 
 #endif // TREE_TYPE_H_
+#pragma endregion
 
+#pragma region tree
 /**
  * In this implementation, left is the child, right is the next right sibling
  */
 
 #ifndef TREE_H_
 #define TREE_H_
-
-#include <stdlib.h>
 
 /// <summary>
 /// Make a node with data
@@ -525,6 +871,11 @@ void treeInOrder(Tree *t, Consume1 action);
 
 void treePostOrder(Tree *t, Consume1 action);
 
+long treeHeight(Tree *tree);
+
+long treeNodeDepth(Tree *tree, void *data, CompareFunction compareFunction);
+
+#endif // TREE_H_
 
 TreeNode *treeCreateNode(void *data) {
     quickCalloc(TreeNode, node);
@@ -763,218 +1114,18 @@ long treeNodeDepth(Tree *tree, void *data, CompareFunction compare) {
     return _treeNodeDepth(tree->root, 0, data, compare);
 }
 
-#endif // TREE_H_
 
-#ifndef SELECTION_SORT_H_
-#define SELECTION_SORT_H_
+#pragma endregion
 
-#include <stdlib.h>
-
-void selectionSort(void *arr[], size_t arrSize, CompareFunction compareFunction);
-
-void selectionSort(void *arr[], size_t arrSize, CompareFunction compareFunction) {
-    for (int i = 0; i < arrSize; i++) {
-        int minIdx = i;
-
-        for (int j = i + 1; j < arrSize; j++) {
-            if (compareFunction(arr[i], arr[j]) > 0) {
-                minIdx = j;
-            }
-        }
-
-        void *tmp = arr[minIdx];
-        arr[minIdx] = arr[i];
-        arr[i] = tmp;
-    }
-}
-
-#endif //SELECTION_SORT_H_
-
-#ifndef MERGE_SORT_H
-#define MERGE_SORT_H
-
-
-void mergeSort(void *arr[], int n, CompareFunction compare);
-
-// Merges two sub-arrays of arr[].
-// First subarray is arr[l..m]
-// Second subarray is arr[m+1..r]
-void merge(void *arr[], int l, int m, int r, CompareFunction compare) {
-    int i, j, k;
-    int n1 = m - l + 1;
-    int n2 = r - m;
-
-    // Create temp arrays
-    void **L = (void **) malloc(sizeof(void *) * n1);
-    void **R = (void **) malloc(sizeof(void *) * n2);
-
-    // Copy data to temp arrays L[] and R[]
-    for (i = 0; i < n1; i++)
-        L[i] = arr[l + i];
-    for (j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
-
-    // Merge the temp arrays back into arr[l..r]
-    i = 0;
-    j = 0;
-    k = l;
-    while (i < n1 && j < n2) {
-        if (compare(L[i], R[j]) <= 0) {
-            arr[k] = L[i];
-            i++;
-        } else {
-            arr[k] = R[j];
-            j++;
-        }
-        k++;
-    }
-
-    // Copy the remaining elements of L[],
-    // if there are any
-    while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
-    }
-    free(L);
-
-    // Copy the remaining elements of R[],
-    // if there are any
-    while (j < n2) {
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
-    free(R);
-}
-
-// l is for left index and r is right index of the
-// sub-array of arr to be sorted
-void sortSubArray(void *arr[], int l, int r, CompareFunction pFunction) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-
-        // Sort first and second halves
-        sortSubArray(arr, l, m, pFunction);
-        sortSubArray(arr, m + 1, r, pFunction);
-
-        merge(arr, l, m, r, pFunction);
-    }
-}
-
-void mergeSort(void *arr[], int n, CompareFunction compare) {
-    sortSubArray(arr, 0, n - 1, compare);
-}
-
-#endif //MERGE_SORT_H
-
-
-#ifndef HEAP_SORT_H
-#define HEAP_SORT_H
-
-void heapSort(void *arr[], size_t arrSize, CompareFunction compareFunction);
-
-void heapify(void *arr[], int n, int i, CompareFunction compare) {
-    // Find largest among root,
-    // left child and right child
-
-    // Initialize largest as root
-    int largestIndex = i;
-
-    // left = 2*i + 1
-    int leftIndex = 2 * i + 1;
-
-    // right = 2*i + 2
-    int rightIndex = 2 * i + 2;
-
-    // If left child is larger than root
-    if (leftIndex < n && compare(arr[leftIndex], arr[largestIndex]) > 0)
-        largestIndex = leftIndex;
-
-    // If right child is larger than largest
-    // so far
-    if (rightIndex < n && compare(arr[rightIndex], arr[largestIndex]) > 0)
-        largestIndex = rightIndex;
-
-    // Swap and continue heapify
-    // if root is not the largest
-    // If largest is not root
-    if (largestIndex != i) {
-        void *tmpV = arr[i];
-        arr[i] = arr[largestIndex];
-        arr[largestIndex] = tmpV;
-
-        // Recursively heapify the affected
-        // subtree
-        heapify(arr, n, largestIndex, compare);
-    }
-}
-
-void heapSort(void *arr[], size_t arrSize, CompareFunction compareFunction) {
-    // build max heap
-    for (int i = (arrSize / 2) - 1; i >= 0; i--) {
-        heapify(arr, arrSize, i, compareFunction);
-    }
-
-    // sort
-    for (int i = arrSize - 1; i >= 0; i--) {
-        void *tmpV = arr[0];
-        arr[0] = arr[i];
-        arr[i] = tmpV;
-
-        // Heapify root element
-        // to get highest element at
-        // root again
-        heapify(arr, i, 0, compareFunction);
-    }
-}
-
-
-#endif //HEAP_SORT_H
-
-//
-// Created by tu on 04/12/2023.
-//
-#ifndef INYEAR4_1_BINARY_SEARCH_H
-#define INYEAR4_1_BINARY_SEARCH_H
-
-/**
- * Find the target index in the array
- * @param arr the array
- * @param n length of array
- * @param target pointer to target
- * @param compare how to compare each elemnt in array with target
- * @return index of target in array <br> an int that less than 0 if cant find target in array
- */
-int binarySearch(void *arr[], int n, void *target, CompareFunction compare);
-
-int _binarySearch(void* arr[], int leftI, int rightI, void *target, CompareFunction compare) {
-    while (leftI <= rightI) {
-        int current = leftI + (rightI - leftI) / 2;
-        if (compare(arr[current], target) == 0)
-            return current;
-
-        if (compare(arr[current], target) < 0)
-            leftI = current + 1;
-        else
-            rightI = current - 1;
-    }
-    return -1;
-}
-
-
-int binarySearch(void **arr, int n, void *target, CompareFunction compare) {
-    return _binarySearch(arr, 0, n - 1, target, compare);
-}
-
-
-
-#endif //INYEAR4_1_BINARY_SEARCH_H
-
+#pragma region b_tree
 #ifndef BINARY_TREE_H_
 #define BINARY_TREE_H_
 
-// <summary>
+/**
+ * In this implementation, both left and right are the child
+ */
+
+/// <summary>
 /// Make a node with data
 /// </summary>
 /// <param name="data">Content of the node, maybe id</param>
@@ -1006,6 +1157,9 @@ void bTreePostOrder(Tree *t, Consume1 action);
 long bTreeHeight(Tree *tree);
 
 long bTreeNodeDepth(Tree *tree, void *data, CompareFunction compareFunction);
+
+
+#endif // BINARY_TREE_H_
 
 TreeNode *bTreeCreateNode(void *data) {
     quickCalloc(TreeNode, newNode);
@@ -1086,233 +1240,8 @@ void bTreePostOrder(Tree *t, Consume1 action) {
         bNodePostOrder(t->root, action);
     }
 }
-#endif // BINARY_TREE_H_
-
-//
-// Created by tu on 12/11/23.
-//
-
-#ifndef INYEAR4_1_HASH_MAP_H
-#define INYEAR4_1_HASH_MAP_H
-
-/**
- * @param size: how many elements are in the map <br>
- * @param capacity: length of content <br>
- * @param content: array of array_list <br>
- * @param hashFunction: how to hash a key
- * @param compareFunction: how to compare 2 key
- */
-typedef struct hash_map {
-    ArrayList** content;
-    int size;
-    int capacity;
-    HashFunction hashFunction;
-    CompareFunction compareFunction;
-}HashMap;
-
-HashMap *createHashmap(HashFunction hashFunction, CompareFunction compareFunction);
-
-/**
- * Insert value to map
- * @param map
- * @param key
- * @param value new value
- * @param compare compare 2 key
- * @return old value if key existed <br>
- * NULL if no existed key
- */
-void *hashmapPut(HashMap *map, void *key, void *value);
-
-void *hashmapGet(HashMap *map, void *key);
-
-ArrayList *keySet(HashMap *map);
-
-void freeHashmap(HashMap* map, Consume1 freeKey, Consume1 freeValue);
-
-
-#define DEFAULT_MAP_SIZE 100
-#define MAP_SCALE 2
-
-typedef struct entry{
-    void *key;
-    void *value;
-    int hashCode;
-}Entry;
-
-void hashmapInitContent(HashMap *map) {
-    map->content = (ArrayList**) malloc(map->capacity * sizeof(ArrayList*));
-    for (int i = 0; i < map->capacity; i++) {
-        map->content[i] = arraylist_create();
-    }
-}
-
-void hashmapFreeContent(ArrayList **content, int length, Consume1 freeKey, Consume1 freeValue) {
-    for (int i = 0; i < length; ++i) {
-        ArrayList *bucket = content[i];
-        for (int j = 0; j < bucket->length; j++) {
-            Entry *entry = (Entry*)arraylist_get(bucket, j);
-            if (freeKey) freeKey(entry->key);
-            if (freeValue) freeValue(entry->value);
-            free(entry);
-        }
-        arraylist_free(bucket);
-    }
-
-    free(content);
-}
-
-void enlargeHashmap(HashMap *map) {
-    // get old length and map
-    int oldCapacity = map->capacity;
-    ArrayList **oldContent = map->content;
-
-    // enlarge content
-    map->capacity *= MAP_SCALE;
-    hashmapInitContent(map);
-
-    // move old content
-    for (int i = 0; i < oldCapacity; i++) {
-        ArrayList *oldBucket = oldContent[i];
-        for (int j = 0; j < oldBucket->length; i++) {
-            Entry *entry = (Entry*) oldBucket->content[j];
-            unsigned int newIndex = entry->hashCode % map->capacity;
-            arraylist_add_last(map->content[newIndex], entry);
-        }
-    }
-
-    // free old content
-    hashmapFreeContent(oldContent, oldCapacity, NULL, NULL);
-}
-
-HashMap *createHashmap(HashFunction hashFunction, CompareFunction compareFunction) {
-    HashMap *map = (HashMap*)malloc(sizeof(HashMap));
-
-    map->capacity = DEFAULT_MAP_SIZE;
-
-    hashmapInitContent(map);
-
-    map->compareFunction = compareFunction;
-    map->hashFunction = hashFunction;
-    map->size = 0;
-
-    return map;
-}
-
-void *hashmapPut(HashMap *map, void *key, void *value) {
-    if (map->size >= map->capacity) {
-        enlargeHashmap(map);
-    }
-
-    int hashCode = map->hashFunction(key);
-    unsigned int index = hashCode % map->capacity;
-    ArrayList *bucket = map->content[index];
-
-    // search for key in bucket, if exists, replace
-    for (int i = 0; i < bucket->length; i++) {
-        Entry *entry = (Entry*)arraylist_get(bucket, i);
-        // check key equal key
-        if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
-            void *oldValue = entry->value;
-            entry->value = value;
-            return oldValue;
-        }
-    }
-
-    // if not exist, add entry
-    Entry *newEntry = (Entry*) malloc(sizeof(Entry));
-    newEntry->key = key;
-    newEntry->value = value;
-    newEntry->hashCode = hashCode;
-    arraylist_add_last(bucket, newEntry);
-
-    map->size += 1;
-    return NULL;
-}
-
-void *hashmapGet(HashMap *map, void *key) {
-    int hashCode = map->hashFunction(key);
-    unsigned int index = hashCode % map->capacity;
-    ArrayList* bucket = map->content[index];
-
-    // Check if the key exists in the bucket
-    for (int i = 0; i < bucket->length; ++i) {
-        Entry *entry = (Entry*)arraylist_get(bucket, i);
-        // check key equal key
-        if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
-            // Key found, return the associated value
-            return entry->value;
-        }
-    }
-
-    // Key not found
-    return NULL;
-}
-
-void freeHashmap(HashMap *map, Consume1 freeKey, Consume1 freeValue) {
-    if (map == NULL) {
-        return;
-    }
-
-    hashmapFreeContent(map->content, map->capacity, freeKey, freeValue);
-
-    free(map);
-}
-
-ArrayList *keySet(HashMap *map) {
-    ArrayList *list = arraylist_create();
-
-    for (int i = 0; i < map->capacity; ++i) {
-        ArrayList *bucket = map->content[i];
-        for (int j = 0; j < bucket->length; j++) {
-            Entry *entry = (Entry*)arraylist_get(bucket, j);
-            arraylist_add_last(list,entry->key);
-        }
-    }
-
-    return NULL;
-}
-
-
-
-
-#endif //INYEAR4_1_HASH_MAP_H
-
-int hashInt(void *vi) {
-    int value = void2(int, vi);
-    value ^= value >> 16;
-    value *= 0x85ebca6b;
-    value ^= value >> 13;
-    value *= 0xc2b2ae35;
-    value ^= value >> 16;
-    return value;
-}
-
-int hashVoid(void *v, size_t size) {
-    int hash = 17;
-
-    char *c = (char*)v;
-
-    for (int i = 0; i < size; i++) {
-        hash = (hash * 33) ^ c[i];
-    }
-
-    return hash;
-}
-
-int hashString(const char *c) {
-    int hash = 17;
-
-    for (int i = 0; c[i] != '\0'; i++) {
-        hash = (hash * 33) ^ c[i];
-    }
-
-    return hash;
-}
-
 
 #pragma endregion
-
-
 
 int hashStr(char* str) {
     return hashString(str);
