@@ -22,14 +22,17 @@ void hashmapInitContent(HashMap *map) {
     }
 }
 
-void hashmapFreeContent(ArrayList **content, int length, Consume1 freeKey, Consume1 freeValue) {
+void hashmapFreeContent(ArrayList **content, int length, Consume1 freeKey, Consume1 freeValue, int doFreeEntry) {
     for (int i = 0; i < length; ++i) {
         ArrayList *bucket = content[i];
-        for (int j = 0; j < bucket->length; j++) {
-            Entry *entry = (Entry*)arraylist_get(bucket, j);
-            if (freeKey) freeKey(entry->key);
-            if (freeValue) freeValue(entry->value);
-            free(entry);
+        if (doFreeEntry) {
+            for (int j = 0; j < bucket->length; j++) {
+                // free each entry, key, val
+                Entry *entry = (Entry *) arraylist_get(bucket, j);
+                if (freeKey) freeKey(entry->key);
+                if (freeValue) freeValue(entry->value);
+                free(entry);
+            }
         }
         arraylist_free(bucket);
     }
@@ -49,7 +52,7 @@ void enlargeHashmap(HashMap *map) {
     // move old content
     for (int i = 0; i < oldCapacity; i++) {
         ArrayList *oldBucket = oldContent[i];
-        for (int j = 0; j < oldBucket->length; i++) {
+        for (int j = 0; j < oldBucket->length; j++) {
             Entry *entry = (Entry*) oldBucket->content[j];
             int newIndex = abs(entry->hashCode % map->capacity);
             arraylist_add_last(map->content[newIndex], entry);
@@ -57,7 +60,7 @@ void enlargeHashmap(HashMap *map) {
     }
 
     // free old content
-    hashmapFreeContent(oldContent, oldCapacity, NULL, NULL);
+    hashmapFreeContent(oldContent, oldCapacity, NULL, NULL, 0);
 }
 
 HashMap *createHashmap(HashFunction hashFunction, CompareFunction compareFunction) {
@@ -129,7 +132,7 @@ void freeHashmap(HashMap *map, Consume1 freeKey, Consume1 freeValue) {
         return;
     }
 
-    hashmapFreeContent(map->content, map->capacity, freeKey, freeValue);
+    hashmapFreeContent(map->content, map->capacity, freeKey, freeValue, 1);
 
     free(map);
 }
