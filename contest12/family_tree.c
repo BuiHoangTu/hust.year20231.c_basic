@@ -44,19 +44,19 @@ Person *createPerson() {
 }
 
 /**
- * Count amount of target in root
- * @param root
+ * Count amount of target in treeNode
+ * @param treeNode
  * @param compare how to compare treeNode.data with target
  * @param target
- * @return amount of target in root
+ * @return amount of target in treeNode
  */
-int countTarget(TreeNode *root, CompareFunction compare, void *target) {
-    if (root == NULL) return 0;
+int countTarget(TreeNode *treeNode, CompareFunction compare, void *target) {
+    if (treeNode == NULL) return 0;
 
     int count = 0;
-    if (compare(root->data, target) == 0) count += 1;
-    count += countTarget(root->left, compare, target);
-    count += countTarget(root->right, compare, target);
+    if (compare(treeNode->data, target) == 0) count += 1;
+    count += countTarget(treeNode->left, compare, target);
+    count += countTarget(treeNode->right, compare, target);
     return count;
 }
 
@@ -148,6 +148,11 @@ int main () {
     sscanf(strtok(NULL, STRTOK_DELIM), "%d", &searchingId);
 
     TreeNode *searchingNode = treeFindNode(&searchingId, tree, comparePersonWithId);
+
+    if (comparePersonWithName(searchingNode->data, searchingName) != 0) {
+        printf("0");
+        return 0;
+    }
 
     // search child
     int count = countTarget(searchingNode->left, comparePersonWithName, searchingName);

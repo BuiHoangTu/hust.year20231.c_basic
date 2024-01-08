@@ -1248,86 +1248,160 @@ void bTreePostOrder(Tree *t, Consume1 action) {
 
 #pragma endregion
 
-Tree *tree;
+//
+// Created by tu on 25/12/2023.
+//
+/**
+* Viết chương trình C thực hiện các công việc cài đặt một cây gia phả như sau
+(1). Yêu cầu người dùng nhập vào N đại diện cho số người nam có trên cây gia phả.
+(2). Yêu cầu nhập vào N dòng, mỗi dòng có định dạng sau: ID của cha, ID của người hiện tại, Tên người, số con trai của người đó đó, danh sách tên các người con cách nhau bởi dấu cách. Chú ý rằng trong cây gia phả này thì một người có thể có tên trùng với tổ tiên ở trên của họ. Nếu ID của cha bằng -1 thì nó ám chỉ người hiện tại đang là tổ tiên của cả dòng họ (trong cây gia phả thì đây là nút gốc)
+(3) Biết rằng người ta quy ước thành viên đầu tiên trong cây gia phả là thuộc thế hệ số 0, chương trình cho phép người dùng nhập vào tên người và thế hệ của họ, chương trình phải in ra ra số lượng các thế hệ sau của họ mà có trùng tên với người đó. Giả sử không có ai cùng một thế hệ mà trùng tên nhau.
+*/
 
-void makeRoot(char *command) {
+
+const char *STRTOK_DELIM = " \n";
+
+typedef struct {
     int id;
-    sscanf(command + 8, "%d", &id);
+    char *name;
+}Person;
 
-    TreeNode *root = treeCreateNode(copy2heap(&id, sizeof(int)));
-    tree = createTree(root);
+int comparePersonWithId(void *pVoid, void *idVoid) {
+    int id = *(int*) idVoid;
+    Person *person = (Person*) pVoid;
+
+    return person->id - id;
 }
 
-void insert(char *command) {
-    int parentId, curId;
-    sscanf(command + 6, "%d %d", &curId, &parentId);
 
-    // check if child exist
-    TreeNode *child = treeFindNode(&curId, tree, intCmp);
-    if (child)
-        return;
+int comparePersonWithName(void *pVoid, void *nameVoid) {
+    char *name = (char *)nameVoid;
+    Person *person = (Person*) pVoid;
 
-    // find the parent
-    TreeNode *parent = treeFindNode(&parentId, tree, intCmp);
-    if (!parent)
-        return;
-    treeAddLastChild(parent, copy2heap(&curId, sizeof(int)));
+    return strcmp(person->name, name);
 }
 
-void printNodeData(void *data) {
-    printf("%d ", void2(int, data));
+Person *createPerson() {
+    Person *p = (Person*) malloc(sizeof(Person));
+    p->id = -1;
+    p->name = NULL;
+
+    return p;
 }
 
-void inOrder() {
-    treeInOrder(tree, printNodeData);
+/**
+ * Count amount of target in treeNode
+ * @param treeNode
+ * @param compare how to compare treeNode.data with target
+ * @param target
+ * @return amount of target in treeNode
+ */
+int countTarget(TreeNode *treeNode, CompareFunction compare, void *target) {
+    if (treeNode == NULL) return 0;
+
+    int count = 0;
+    if (compare(treeNode->data, target) == 0) count += 1;
+    count += countTarget(treeNode->left, compare, target);
+    count += countTarget(treeNode->right, compare, target);
+    return count;
 }
 
-void preOrder() {
-    treePreOrder(tree, printNodeData);
-}
+int main () {
+    char *line = (char*) malloc(1024);
+    FILE *input = stdin;
 
-void postOrder() {
-    treePostOrder(tree, printNodeData);
-}
+    Tree *tree = createTree(NULL);
 
-void height(char *command) {
-    int nodeId;
-    sscanf(command + 6, "%d", &nodeId);
-    TreeNode *root = treeFindNode(&nodeId, tree, intCmp);
-    Tree *tmpTree = createTree(root);
-    printf("%ld\n", treeHeight(tmpTree));
-    free(tmpTree);
-}
+    int n;
+    fgets(line, 1024, input);
+    sscanf(line, "%d", &n);
 
-void depth(char *command) {
-    int nodeId;
-    sscanf(command + 5, "%d", &nodeId);
-    printf("%ld\n", treeNodeDepth(tree, &nodeId, intCmp));
+    // read the first firstPerson
+    Person *firstPerson = createPerson();
 
-}
+    fgets(line, 1024, input);
+    n --;
+    int firstParentId; // ignored, bc == -1
+    sscanf(strtok(line, STRTOK_DELIM), "%d", &firstParentId);
 
-int main(int argc, const char *argv[]) {
-    char *line = (char *) malloc(1024);
+    int firstId;
+    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &firstId);
+    firstPerson->id = firstId;
 
-    while (1) {
-        fgets(line, 1024, stdin);
-        if (strncmp("*", line, 1) == 0)
-            break;
-        if (strncmp("Insert", line, 6) == 0)
-            insert(line);
-        if (strncmp("InOrder", line, 7) == 0)
-            inOrder();
-        if (strncmp("PreOrder", line, 8) == 0)
-            preOrder();
-        if (strncmp("PostOrder", line, 9) == 0)
-            postOrder();
-        if (strncmp("MakeRoot", line, 8) == 0)
-            makeRoot(line);
-        if (strncmp("Height", line, 6) == 0)
-            height(line);
-        if (strncmp("Depth", line, 5) == 0)
-            depth(line);
+    char *firstName = strdup(strtok(NULL, STRTOK_DELIM));
+    firstPerson->name = firstName;
+
+    TreeNode* firstNode = treeCreateNode(firstPerson);
+    tree->root = firstNode;
+
+    int firstChildCount;
+    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &firstChildCount);
+
+    for (int j = 0; j < firstChildCount; j++) {
+        char *childName = strdup(strtok(NULL, STRTOK_DELIM));
+        Person *child = createPerson();
+        child->name = childName;
+
+        treeAddLastChild(firstNode, child);
     }
 
-    return 0;
+
+    // next gen
+    for (int i = 0; i < n; i ++) {
+        fgets(line, 1024, input);
+        int fatherId;
+        sscanf(strtok(line, STRTOK_DELIM), "%d", &fatherId);
+
+        TreeNode *fatherNode = treeFindNode(&fatherId, tree, comparePersonWithId);
+
+        int curId;
+        sscanf(strtok(NULL, STRTOK_DELIM), "%d", &curId);
+
+        char *name = strdup(strtok(NULL, STRTOK_DELIM));
+
+        // find self, insert id by searchingName
+        TreeNode *siblingNode = fatherNode->left;
+
+        while (siblingNode) {
+            Person *curPerson = (Person *) (siblingNode->data);
+            if (strcmp(curPerson->name, name) == 0) {
+                curPerson->id = curId;
+                break;
+            }
+            siblingNode = siblingNode->right;
+        }
+
+        // insert child
+        int childCount;
+        sscanf(strtok(NULL, STRTOK_DELIM), "%d", &childCount);
+
+        for (int j = 0; j < childCount; j++) {
+            char *childName = strdup(strtok(NULL, STRTOK_DELIM));
+            Person *child = createPerson();
+            child->name = childName;
+
+            treeAddLastChild(siblingNode, child);
+        }
+
+    }
+
+    //////////////////// search father
+    fgets(line, 1024, input);
+
+    char *searchingName = strdup(strtok(line, STRTOK_DELIM));
+
+    int searchingId;
+    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &searchingId);
+
+    TreeNode *searchingNode = treeFindNode(&searchingId, tree, comparePersonWithId);
+
+    if (comparePersonWithName(searchingNode->data, searchingName) != 0) {
+        printf("0");
+        return 0;
+    }
+
+    // search child
+    int count = countTarget(searchingNode->left, comparePersonWithName, searchingName);
+
+    printf("%d", count);
 }
