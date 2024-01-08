@@ -12,7 +12,8 @@
 #include "stdlib.h"
 #include "string.h"
 #include "tree/tree.h"
-#include "array/array_list.h"
+
+const char *STRTOK_DELIM = " \n";
 
 typedef struct {
     int id;
@@ -43,100 +44,104 @@ Person *createPerson() {
 }
 
 int countInTree(Tree *root) {
-
+    return 0;
 }
 
 int main () {
     char *line = (char*) malloc(1024);
+    FILE *input = fopen("./family_tree.txt", "r");
 
     Tree *tree = createTree(NULL);
 
     int n;
-    fgets(line, 1024, stdin);
+    fgets(line, 1024, input);
     sscanf(line, "%d", &n);
 
-    // root
-    Person *root = createPerson();
+    // read the first firstPerson
+    Person *firstPerson = createPerson();
 
-    fgets(line, 1024, stdin);
-    int firstParentId;
-    sscanf(strtok(line, " "), "%d", &firstParentId);
-//    root->id = firstParentId;
+    fgets(line, 1024, input);
+    n --;
+    int firstParentId; // ignored, bc == -1
+    sscanf(strtok(line, STRTOK_DELIM), "%d", &firstParentId);
 
     int firstId;
-    sscanf(strtok(NULL, " "), "%d", &firstId);
-    root->id = firstId;
+    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &firstId);
+    firstPerson->id = firstId;
 
-    char *firstName = strdup(strtok(NULL, " "));
-    root->name = firstName;
+    char *firstName = strdup(strtok(NULL, STRTOK_DELIM));
+    firstPerson->name = firstName;
 
-    TreeNode* firstNode = treeCreateNode(root);
+    TreeNode* firstNode = treeCreateNode(firstPerson);
     tree->root = firstNode;
 
     int firstChildCount;
-    sscanf(strtok(NULL, " "), "%d", &firstChildCount);
+    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &firstChildCount);
 
     for (int j = 0; j < firstChildCount; j++) {
-        char *childName = strdup(strtok(NULL, " "));
+        char *childName = strdup(strtok(NULL, STRTOK_DELIM));
         Person *child = createPerson();
         child->name = childName;
-        child->id = j;
 
         treeAddLastChild(firstNode, child);
     }
 
 
     // next gen
-    for (int i = 0; i < n - 1; i ++) {
-        fgets(line, 1024, stdin);
+    for (int i = 0; i < n; i ++) {
+        fgets(line, 1024, input);
         int fatherId;
-        sscanf(strtok(line, " "), "%d", &fatherId);
+        sscanf(strtok(line, STRTOK_DELIM), "%d", &fatherId);
 
         TreeNode *fatherNode = treeFindNode(&fatherId, tree, comparePersonWithId);
 
         int curId;
-        sscanf(strtok(NULL, " "), "%d", &curId);
+        sscanf(strtok(NULL, STRTOK_DELIM), "%d", &curId);
 
-        char *name = strdup(strtok(NULL, " "));
+        char *name = strdup(strtok(NULL, STRTOK_DELIM));
 
-        // insert id by name
-        TreeNode *childNode = fatherNode->left;
-        while (childNode) {
-            if (comparePersonWithName(childNode, name)) {
-                ((Person*)(childNode->data))->id = curId;
+        // find self, insert id by name
+        TreeNode *siblingNode = fatherNode->left;
+
+        while (siblingNode) {
+            Person *curPerson = (Person *) (siblingNode->data);
+            if (strcmp(curPerson->name, name) == 0) {
+                curPerson->id = curId;
+                break;
             }
+            siblingNode = siblingNode->right;
         }
 
         // insert child
         int childCount;
-        sscanf(strtok(NULL, " "), "%d", &childCount);
+        sscanf(strtok(NULL, STRTOK_DELIM), "%d", &childCount);
 
         for (int j = 0; j < childCount; j++) {
-            char *childName = strdup(strtok(NULL, " "));
+            char *childName = strdup(strtok(NULL, STRTOK_DELIM));
             Person *child = createPerson();
             child->name = childName;
-            child->id = j;
 
-            treeAddLastChild(firstNode, child);
+            treeAddLastChild(siblingNode, child);
         }
 
     }
 
-    // get search father
-    fgets(line, 1024, stdin);
+    //////////////////// search father
+    fgets(line, 1024, input);
 
-    char *name = strdup(strtok(line, " "));
+    char *name = strdup(strtok(line, STRTOK_DELIM));
 
     int curId;
-    sscanf(strtok(NULL, " "), "%d", &curId);
+    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &curId);
 
     TreeNode *fatherNode = treeFindNode(&curId, tree, comparePersonWithId);
 
 
     TreeNode *childNode = fatherNode->left;
     while (childNode) {
-        if (comparePersonWithName(childNode, name)) {
-            ((Person*)(childNode->data))->id = curId;
+        Person *person = (Person*)(childNode->data);
+        if (strcmp(person->name, name) == 0) {
+            person->id = curId;
         }
     }
 

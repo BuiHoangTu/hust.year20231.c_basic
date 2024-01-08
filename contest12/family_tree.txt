@@ -1,0 +1,14 @@
+12
+-1 0 John 4 Ken Ronaldo Harry Peter
+0 1 Ken 2 Bob Jack
+0 2 Ronaldo 2 Brad Edriss
+0 3 Harry 2 Nick Hag
+0 4 Peter 1 John
+1 5 Bob 0
+1 6 Jack 0
+2 7 Brad 0
+2 8 Edriss 0
+3 9 Nick 0
+3 10 Hag 1 Hag
+10 11 Hag 0
+John 0
