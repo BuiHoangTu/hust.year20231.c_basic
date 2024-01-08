@@ -13,30 +13,30 @@ typedef struct
 } ArrayList;
 
 
-ArrayList *arraylist_create();
+ArrayList *createArraylist();
 
 
 /**
  * Add an object to a list
  */
-void arraylist_add_last(ArrayList *list, void *object);
+void arraylistAddLast(ArrayList *list, void *object);
 
 /**
  * Insert an object to the specified position
  */
-void arraylist_insert(ArrayList *list, int index, void *obj);
+void arraylistInsert(ArrayList *list, int index, void *obj);
 
 /**
  * Get object at index
  */
-void *arraylist_get(ArrayList *list, int index);
+void *arraylistGet(ArrayList *list, int index);
 
 /**
  * Remove and return element so user can free it if needed
  */
-void *arraylist_remove(ArrayList *list, int index);
+void *arraylistRemove(ArrayList *list, int index);
 
-void _arraylist_next(ArrayList *list, int *index, void **obj);
+void _arraylistNext(ArrayList *list, int *index, void **obj);
 
 /**
  * foreach object in the list, you do thing
@@ -45,6 +45,6 @@ void _arraylist_next(ArrayList *list, int *index, void **obj);
     int _i = 0;            \
     for (void *obj = list->content[0]; _i < list->length; _arraylist_next(list, &_i, &obj))
 
-void arraylist_free(ArrayList *list);
+void freeArraylist(ArrayList *list);
 
 #endif //MINI_LIBRARY_ARRAY_LIST_H

@@ -134,7 +134,7 @@ typedef struct
 } ArrayList;
 
 
-ArrayList *arraylist_create();
+ArrayList *createArraylist();
 
 
 /**
@@ -187,7 +187,7 @@ void _arr_enlarge(ArrayList *list)
     }
 }
 
-ArrayList *arraylist_create()
+ArrayList *createArraylist()
 {
     /* Allocate Memory */
     ArrayList *list = malloc(sizeof(ArrayList));
@@ -634,7 +634,7 @@ typedef struct entry{
 void hashmapInitContent(HashMap *map) {
     map->content = (ArrayList**) malloc(map->capacity * sizeof(ArrayList*));
     for (int i = 0; i < map->capacity; i++) {
-        map->content[i] = arraylist_create();
+        map->content[i] = createArraylist();
     }
 }
 
@@ -754,7 +754,7 @@ void freeHashmap(HashMap *map, Consume1 freeKey, Consume1 freeValue) {
 }
 
 ArrayList *keySet(HashMap *map) {
-    ArrayList *list = arraylist_create();
+    ArrayList *list = createArraylist();
 
     for (int i = 0; i < map->capacity; ++i) {
         ArrayList *bucket = map->content[i];

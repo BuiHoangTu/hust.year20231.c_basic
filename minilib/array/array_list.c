@@ -19,7 +19,7 @@ void _arr_enlarge(ArrayList *list)
     }
 }
 
-ArrayList *arraylist_create()
+ArrayList *createArraylist()
 {
     /* Allocate Memory */
     ArrayList *list = malloc(sizeof(ArrayList));
@@ -33,23 +33,23 @@ ArrayList *arraylist_create()
     return list;
 }
 
-void _arraylist_next(ArrayList *list, int *index, void **obj)
+void _arraylistNext(ArrayList *list, int *index, void **obj)
 {
     (*index)++;
     *obj = list->content[*index];
 }
 
-void arraylist_add_last(ArrayList *list, void *elem)
+void arraylistAddLast(ArrayList *list, void *object)
 {
     // need bigger size
     _arr_enlarge(list);
 
     /* Adds one element of generic pointer type to the internal array */
-    list->content[list->length] = elem;
+    list->content[list->length] = object;
     list->length += 1;
 }
 
-void arraylist_insert(ArrayList *list, int index, void *obj)
+void arraylistInsert(ArrayList *list, int index, void *obj)
 {
     // bigger size
     _arr_enlarge(list);
@@ -59,13 +59,13 @@ void arraylist_insert(ArrayList *list, int index, void *obj)
     list->length++;
 }
 
-void *arraylist_get(ArrayList *list, int index)
+void *arraylistGet(ArrayList *list, int index)
 {
     /* Gets an member of the array at an index */
     return list->content[index];
 }
 
-void *arraylist_remove(ArrayList *list, int index)
+void *arraylistRemove(ArrayList *list, int index)
 {
     /* Removes one element at and index */
     if (index > list->length - 1)
@@ -78,7 +78,7 @@ void *arraylist_remove(ArrayList *list, int index)
     return del_elem;
 }
 
-void arraylist_free(ArrayList *list)
+void freeArraylist(ArrayList *list)
 {
     /* Clears the internal array */
     free(list->content);

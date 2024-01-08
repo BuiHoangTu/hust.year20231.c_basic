@@ -18,7 +18,7 @@ typedef struct entry{
 void hashmapInitContent(HashMap *map) {
     map->content = (ArrayList**) malloc(map->capacity * sizeof(ArrayList*));
     for (int i = 0; i < map->capacity; i++) {
-        map->content[i] = arraylist_create();
+        map->content[i] = createArraylist();
     }
 }
 
@@ -28,13 +28,13 @@ void hashmapFreeContent(ArrayList **content, int length, Consume1 freeKey, Consu
         if (doFreeEntry) {
             for (int j = 0; j < bucket->length; j++) {
                 // free each entry, key, val
-                Entry *entry = (Entry *) arraylist_get(bucket, j);
+                Entry *entry = (Entry *) arraylistGet(bucket, j);
                 if (freeKey) freeKey(entry->key);
                 if (freeValue) freeValue(entry->value);
                 free(entry);
             }
         }
-        arraylist_free(bucket);
+        freeArraylist(bucket);
     }
 
     free(content);
@@ -55,7 +55,7 @@ void enlargeHashmap(HashMap *map) {
         for (int j = 0; j < oldBucket->length; j++) {
             Entry *entry = (Entry*) oldBucket->content[j];
             int newIndex = abs(entry->hashCode % map->capacity);
-            arraylist_add_last(map->content[newIndex], entry);
+            arraylistAddLast(map->content[newIndex], entry);
         }
     }
 
@@ -88,7 +88,7 @@ void *hashmapPut(HashMap *map, void *key, void *value) {
 
     // search for key in bucket, if exists, replace
     for (int i = 0; i < bucket->length; i++) {
-        Entry *entry = (Entry*)arraylist_get(bucket, i);
+        Entry *entry = (Entry*) arraylistGet(bucket, i);
         // check key equal key
         if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
             void *oldValue = entry->value;
@@ -102,7 +102,7 @@ void *hashmapPut(HashMap *map, void *key, void *value) {
     newEntry->key = key;
     newEntry->value = value;
     newEntry->hashCode = hashCode;
-    arraylist_add_last(bucket, newEntry);
+    arraylistAddLast(bucket, newEntry);
 
     map->size += 1;
     return NULL;
@@ -115,7 +115,7 @@ void *hashmapGet(HashMap *map, void *key) {
 
     // Check if the key exists in the bucket
     for (int i = 0; i < bucket->length; ++i) {
-        Entry *entry = (Entry*)arraylist_get(bucket, i);
+        Entry *entry = (Entry*) arraylistGet(bucket, i);
         // check key equal key
         if (entry->key == key || map->compareFunction(entry->key, key) == 0) {
             // Key found, return the associated value
@@ -138,13 +138,13 @@ void freeHashmap(HashMap *map, Consume1 freeKey, Consume1 freeValue) {
 }
 
 ArrayList *keySet(HashMap *map) {
-    ArrayList *list = arraylist_create();
+    ArrayList *list = createArraylist();
 
     for (int i = 0; i < map->capacity; ++i) {
         ArrayList *bucket = map->content[i];
         for (int j = 0; j < bucket->length; j++) {
-            Entry *entry = (Entry*)arraylist_get(bucket, j);
-            arraylist_add_last(list,entry->key);
+            Entry *entry = (Entry*) arraylistGet(bucket, j);
+            arraylistAddLast(list, entry->key);
         }
     }
 
