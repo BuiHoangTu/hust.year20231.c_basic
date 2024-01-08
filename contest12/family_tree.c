@@ -43,8 +43,21 @@ Person *createPerson() {
     return p;
 }
 
-int countInTree(Tree *root) {
-    return 0;
+/**
+ * Count amount of target in root
+ * @param root
+ * @param compare how to compare treeNode.data with target
+ * @param target
+ * @return amount of target in root
+ */
+int countTarget(TreeNode *root, CompareFunction compare, void *target) {
+    if (root == NULL) return 0;
+
+    int count = 0;
+    if (compare(root->data, target) == 0) count += 1;
+    count += countTarget(root->left, compare, target);
+    count += countTarget(root->right, compare, target);
+    return count;
 }
 
 int main () {
@@ -100,7 +113,7 @@ int main () {
 
         char *name = strdup(strtok(NULL, STRTOK_DELIM));
 
-        // find self, insert id by name
+        // find self, insert id by searchingName
         TreeNode *siblingNode = fatherNode->left;
 
         while (siblingNode) {
@@ -129,20 +142,15 @@ int main () {
     //////////////////// search father
     fgets(line, 1024, input);
 
-    char *name = strdup(strtok(line, STRTOK_DELIM));
+    char *searchingName = strdup(strtok(line, STRTOK_DELIM));
 
-    int curId;
-    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &curId);
+    int searchingId;
+    sscanf(strtok(NULL, STRTOK_DELIM), "%d", &searchingId);
 
-    TreeNode *fatherNode = treeFindNode(&curId, tree, comparePersonWithId);
+    TreeNode *searchingNode = treeFindNode(&searchingId, tree, comparePersonWithId);
 
+    // search child
+    int count = countTarget(searchingNode->left, comparePersonWithName, searchingName);
 
-    TreeNode *childNode = fatherNode->left;
-    while (childNode) {
-        Person *person = (Person*)(childNode->data);
-        if (strcmp(person->name, name) == 0) {
-            person->id = curId;
-        }
-    }
-
+    printf("%d", count);
 }
