@@ -218,13 +218,13 @@ long treeHeight(Tree *tree) {
 
 long _treeNodeDepth(TreeNode *node, long current, void *data, CompareFunction compare) {
     if (!node)
-        return -1;
+        return 0;
 
     if (compare(node->data, data) == 0) {
         return current;
     } else {
-        // find in right
-        long right = _treeNodeDepth(node->right, current + 1, data, compare);
+        // find in right, sibling, no increase depth
+        long right = _treeNodeDepth(node->right, current, data, compare);
         if (right != -1)
             return right;
             // if nothing in right, try in deeper lv
