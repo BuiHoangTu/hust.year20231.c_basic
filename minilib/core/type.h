@@ -3,6 +3,8 @@
 
 #include "core/heap.h"
 
+#define repeat(var_name, times) for (int var_name = 0; var_name < times; var_name ++)
+
 /**
  * A function defining how 2 compare unk variable (generic structure)
  */
