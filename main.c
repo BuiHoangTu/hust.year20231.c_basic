@@ -816,6 +816,115 @@ int binarySearch(void **arr, int n, void *target, CompareFunction compare) {
 
 #pragma endregion
 
+#pragma region heap sort 
+
+#ifndef HEAP_SORT_H
+#define HEAP_SORT_H
+#include <stdlib.h>
+
+void heapSort(void* arr[], size_t arrSize, CompareFunction compareFunction);
+
+void heapify(void *arr[], int n, int i, CompareFunction compare)
+{
+    int largestIndex = i;
+    int leftIndex = 2 * i + 1;
+    int rightIndex = 2 * i + 2;
+
+    if (leftIndex < n && compare(arr[leftIndex], arr[largestIndex]) > 0)
+        largestIndex = leftIndex;
+
+    if (rightIndex < n && compare(arr[rightIndex], arr[largestIndex]) > 0)
+        largestIndex = rightIndex;
+
+    if (largestIndex != i) {
+        void *tmpV = arr[i];
+        arr[i] = arr[largestIndex];
+        arr[largestIndex] = tmpV;
+
+        // heapify the affected subtree
+        heapify(arr, n, largestIndex, compare);
+    }
+}
+
+void heapSort(void *arr[], size_t arrSize, CompareFunction compareFunction) {
+    // build max heap
+    for (int i = (arrSize / 2) - 1; i >= 0; i-- ) {
+        heapify(arr, arrSize, i, compareFunction);
+    }
+
+    // sort
+    for (int i = arrSize - 1; i >= 0; i--) {
+        void *tmpV = arr[0];
+        arr[0] = arr[i];
+        arr[i] = tmpV;
+
+        heapify(arr, i, 0, compareFunction);
+    }
+}
+
+#endif //HEAP_SORT_H
+
+
+#pragma endregion
+
+#pragma region quick sort 
+#ifndef QUICK_SORT_H
+#define QUICK_SORT_H
+
+void quickSort(void* arr[], int n, CompareFunction compare);
+
+void quickSortArrayList(ArrayList *list, CompareFunction compare);
+
+int partition(void *arr[], int low, int high, CompareFunction compare)
+{
+    int pivotIdx = high;
+    void *pivot = arr[pivotIdx];
+
+    int i = low - 1;
+    for (int j = low; j < high; j++)
+    {
+        // current < pivot
+        if (compare(arr[j], pivot) < 0)
+        {
+            i++;
+            // swap
+            void *tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+    }
+    void *tmp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = tmp;
+
+    return i + 1;
+}
+
+void sortPartition(void *arr[], int low, int high, CompareFunction compare)
+{
+    if (low < high)
+    {
+        int pivotIdx = partition(arr, low, high, compare);
+
+        sortPartition(arr, low, pivotIdx - 1, compare);
+        sortPartition(arr, pivotIdx + 1, high, compare);
+    }
+}
+
+void quickSort(void *arr[], int n, CompareFunction compare)
+{
+    sortPartition(arr, 0, n - 1, compare);
+}
+
+void quickSortArrayList(ArrayList *list, CompareFunction compare)
+{
+    quickSort(list->content, list->length, compare);
+}
+
+
+#endif //QUICK_SORT_H
+#pragma endregion
+
 #pragma region tree_define
 #ifndef TREE_TYPE_H_
 #define TREE_TYPE_H_
