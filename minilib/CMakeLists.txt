@@ -47,6 +47,8 @@ add_library(minilib
         sort/merge_sort.h
         sort/heap_sort.c
         sort/heap_sort.h
+        sort/quick_sort.c
+        sort/quick_sort.h
         search/binary_search.c
         search/binary_search.h
         map/hash_map.c
